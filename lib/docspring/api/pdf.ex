@@ -53,8 +53,8 @@ defmodule Docspring.Api.PDF do
   {:ok, [%CreateSubmissionResponse{}, ...]} on success
   {:error, info} on failure
   """
-  @spec batch_generate_pdfv1(Tesla.Env.client, String.t, list(Docspring.Model.Object.t), keyword()) :: {:ok, list(Docspring.Model.CreateSubmissionResponse.t)} | {:error, Tesla.Env.t}
-  def batch_generate_pdfv1(connection, template_id, object, _opts \\ []) do
+  @spec batch_generate_pdf_v1(Tesla.Env.client, String.t, list(Docspring.Model.Object.t), keyword()) :: {:ok, list(Docspring.Model.CreateSubmissionResponse.t)} | {:error, Tesla.Env.t}
+  def batch_generate_pdf_v1(connection, template_id, object, _opts \\ []) do
     %{}
     |> method(:post)
     |> url("/templates/#{template_id}/submissions/batch")
@@ -77,8 +77,8 @@ defmodule Docspring.Api.PDF do
   {:ok, %Docspring.Model.CreateSubmissionBatchResponse{}} on success
   {:error, info} on failure
   """
-  @spec batch_generate_pd_fs(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.CreateSubmissionBatchResponse.t} | {:error, Tesla.Env.t}
-  def batch_generate_pd_fs(connection, opts \\ []) do
+  @spec batch_generate_pdfs(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.CreateSubmissionBatchResponse.t} | {:error, Tesla.Env.t}
+  def batch_generate_pdfs(connection, opts \\ []) do
     optional_params = %{
       :"SubmissionBatchData" => :body
     }
@@ -104,8 +104,8 @@ defmodule Docspring.Api.PDF do
   {:ok, %Docspring.Model.CreateCombinedSubmissionResponse{}} on success
   {:error, info} on failure
   """
-  @spec combine_pd_fs(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.CreateCombinedSubmissionResponse.t} | {:error, Tesla.Env.t}
-  def combine_pd_fs(connection, opts \\ []) do
+  @spec combine_pdfs(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.CreateCombinedSubmissionResponse.t} | {:error, Tesla.Env.t}
+  def combine_pdfs(connection, opts \\ []) do
     optional_params = %{
       :"CombinePdfsData" => :body
     }

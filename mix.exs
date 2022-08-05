@@ -3,7 +3,7 @@ defmodule Docspring.Mixfile do
 
   def project do
     [app: :docspring,
-     version: "0.0.2",
+     version: "0.0.3",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -12,8 +12,8 @@ defmodule Docspring.Mixfile do
      package: package(),
      source_url: "https://github.com/DocSpring/docspring-elixir",
      docs: [
-      main: "Docspring", # The main page in the docs
-      logo: "../../../public/logo.png",
+      # main: "Docspring", # The main page in the docs
+      # logo: "../../../public/logo.png",
       authors: ["Nathan Broadbent"]
     ]]
   end
