@@ -3,13 +3,19 @@ defmodule Docspring.Mixfile do
 
   def project do
     [app: :docspring,
-     version: "0.0.1",
+     version: "0.0.2",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps(),
      description: description(),
-     package: package()]
+     package: package(),
+     source_url: "https://github.com/DocSpring/docspring-elixir",
+     docs: [
+      main: "Docspring", # The main page in the docs
+      logo: "../../../public/logo.png",
+      authors: ["Nathan Broadbent"]
+    ]]
   end
 
   # Configuration for the OTP application
@@ -35,6 +41,7 @@ defmodule Docspring.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:tesla, "~> 0.8"},
       {:poison, ">= 1.0.0"}
     ]
