@@ -9,7 +9,7 @@ by adding `docspring` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:docspring, "~> 0.0.4"}]
+  [{:docspring, "~> 1.0.0"}]
 end
 ```
 
