@@ -9,14 +9,14 @@ defmodule Docspring.Model.CreateSubmissionDataRequestEventResponse do
   @derive Jason.Encoder
   defstruct [
     :status,
-    :errors,
-    :event
+    :event,
+    :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
-    :errors => [String.t] | nil,
-    :event => Docspring.Model.SubmissionDataRequestEvent.t
+    :event => Docspring.Model.SubmissionDataRequestEvent.t,
+    :errors => [String.t] | nil
   }
 
   alias Docspring.Deserializer

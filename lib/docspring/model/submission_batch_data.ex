@@ -10,24 +10,17 @@ defmodule Docspring.Model.SubmissionBatchData do
   defstruct [
     :metadata,
     :submissions,
-    :template_id,
-    :template_version,
     :test
   ]
 
   @type t :: %__MODULE__{
     :metadata => map() | nil,
-    :submissions => [Docspring.Model.SubmissionDataBatchRequest.t],
-    :template_id => String.t | nil,
-    :template_version => String.t | nil,
+    :submissions => [map()],
     :test => boolean() | nil
   }
 
-  alias Docspring.Deserializer
-
   def decode(value) do
     value
-     |> Deserializer.deserialize(:submissions, :list, Docspring.Model.SubmissionDataBatchRequest)
   end
 end
 

@@ -8,19 +8,19 @@ defmodule Docspring.Connection do
   Additional middleware can be set in the compile-time or runtime configuration:
 
       config :tesla, Docspring.Connection,
-        base_url: "https://api.docspring.com/api/v1",
+        base_url: "https://sync.api.docspring.com/api/v1",
         adapter: Tesla.Adapter.Hackney
 
   The default base URL can also be set as:
 
       config :docspring,
-        :base_url, "https://api.docspring.com/api/v1"
+        :base_url, "https://sync.api.docspring.com/api/v1"
   """
 
   @default_base_url Application.compile_env(
                       :docspring,
                       :base_url,
-                      "https://api.docspring.com/api/v1"
+                      "https://sync.api.docspring.com/api/v1"
                     )
 
 
@@ -87,7 +87,7 @@ defmodule Docspring.Connection do
 
   Tesla.Env.client
   """
-  @spec new(String.t(), String.t(), options) :: Tesla.Env.client()
+  @spec new(String.t(), String.t()), options) :: Tesla.Env.client()
 
 
   def new(username, password, options) when is_binary(username) and is_binary(password) do

@@ -21,10 +21,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.AddFieldsTemplateResponse.t}` on success
+  - `{:ok, Docspring.Model.TemplateAddFieldsResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec add_fields_to_template(Tesla.Env.client, String.t, Docspring.Model.AddFieldsData.t, keyword()) :: {:ok, Docspring.Model.AddFieldsTemplateResponse.t} | {:error, Tesla.Env.t}
+  @spec add_fields_to_template(Tesla.Env.client, String.t, Docspring.Model.AddFieldsData.t, keyword()) :: {:ok, Docspring.Model.TemplateAddFieldsResponse.t} | {:error, Tesla.Env.t}
   def add_fields_to_template(connection, template_id, data, _opts \\ []) do
     request =
       %{}
@@ -36,42 +36,8 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.AddFieldsTemplateResponse},
-      {422, Docspring.Model.AddFieldsTemplateResponse}
-    ])
-  end
-
-  @doc """
-  Generates multiple PDFs
-
-  ### Parameters
-
-  - `connection` (Docspring.Connection): Connection to server
-  - `template_id` (String.t): 
-  - `data` ([Docspring.Model.SubmissionData.t]): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, [%CreateSubmissionResponse{}, ...]}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec batch_generate_pdf_v1(Tesla.Env.client, String.t, list(Docspring.Model.SubmissionData.t), keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, [Docspring.Model.InvalidRequest.t]} | {:ok, [Docspring.Model.CreateSubmissionResponse.t]} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
-  def batch_generate_pdf_v1(connection, template_id, data, _opts \\ []) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/templates/#{template_id}/submissions/batch")
-      |> add_param(:body, :body, data)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response([
-      {201, Docspring.Model.CreateSubmissionResponse},
-      {422, Docspring.Model.InvalidRequest},
-      {401, Docspring.Model.AuthenticationError},
-      {400, Docspring.Model.ErrorResponse}
+      {200, Docspring.Model.TemplateAddFieldsResponse},
+      {422, Docspring.Model.TemplateAddFieldsResponse}
     ])
   end
 
@@ -83,27 +49,34 @@ defmodule Docspring.Api.PDF do
   - `connection` (Docspring.Connection): Connection to server
   - `data` (SubmissionBatchData): 
   - `opts` (keyword): Optional parameters
+    - `:wait` (boolean()): Wait for submission batch to be processed before returning. Set to false to return immediately. Default: true (on sync.* subdomain)
 
   ### Returns
 
-  - `{:ok, Docspring.Model.CreateSubmissionBatchResponse.t}` on success
+  - `{:ok, Docspring.Model.BatchGeneratePdfs201Response.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec batch_generate_pdfs(Tesla.Env.client, Docspring.Model.SubmissionBatchData.t, keyword()) :: {:ok, Docspring.Model.CreateSubmissionBatchResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
-  def batch_generate_pdfs(connection, data, _opts \\ []) do
+  @spec batch_generate_pdfs(Tesla.Env.client, Docspring.Model.SubmissionBatchData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:ok, Docspring.Model.BatchGeneratePdfs201Response.t} | {:error, Tesla.Env.t}
+  def batch_generate_pdfs(connection, data, opts \\ []) do
+    optional_params = %{
+      :wait => :query
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/submissions/batches")
       |> add_param(:body, :body, data)
+      |> add_optional_params(optional_params, opts)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {201, Docspring.Model.CreateSubmissionBatchResponse},
-      {200, Docspring.Model.CreateSubmissionBatchResponse},
-      {401, Docspring.Model.AuthenticationError},
+      {201, Docspring.Model.BatchGeneratePdfs201Response},
+      {200, Docspring.Model.BatchGeneratePdfs201Response},
+      {401, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.MultipleErrorsResponse},
       {400, Docspring.Model.ErrorResponse}
     ])
   end
@@ -122,7 +95,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.CreateCombinedSubmissionResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec combine_pdfs(Tesla.Env.client, Docspring.Model.CombinePdfsData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateCombinedSubmissionResponse.t} | {:ok, Docspring.Model.InvalidRequest.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec combine_pdfs(Tesla.Env.client, Docspring.Model.CombinePdfsData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateCombinedSubmissionResponse.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
   def combine_pdfs(connection, data, _opts \\ []) do
     request =
       %{}
@@ -135,9 +108,9 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.CreateCombinedSubmissionResponse},
-      {422, Docspring.Model.InvalidRequest},
+      {422, Docspring.Model.MultipleErrorsResponse},
       {400, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -149,28 +122,34 @@ defmodule Docspring.Api.PDF do
   - `connection` (Docspring.Connection): Connection to server
   - `data` (CombinedSubmissionData): 
   - `opts` (keyword): Optional parameters
+    - `:wait` (boolean()): Wait for combined submission to be processed before returning. Set to false to return immediately. Default: true (on sync.* subdomain)
 
   ### Returns
 
   - `{:ok, Docspring.Model.CreateCombinedSubmissionResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec combine_submissions(Tesla.Env.client, Docspring.Model.CombinedSubmissionData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateCombinedSubmissionResponse.t} | {:ok, Docspring.Model.InvalidRequest.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
-  def combine_submissions(connection, data, _opts \\ []) do
+  @spec combine_submissions(Tesla.Env.client, Docspring.Model.CombinedSubmissionData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateCombinedSubmissionResponse.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
+  def combine_submissions(connection, data, opts \\ []) do
+    optional_params = %{
+      :wait => :query
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/combined_submissions")
       |> add_param(:body, :body, data)
+      |> add_optional_params(optional_params, opts)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.CreateCombinedSubmissionResponse},
-      {422, Docspring.Model.InvalidRequest},
+      {422, Docspring.Model.MultipleErrorsResponse},
       {400, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -182,14 +161,14 @@ defmodule Docspring.Api.PDF do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): 
   - `opts` (keyword): Optional parameters
-    - `:body` (CopyTemplateData): 
+    - `:body` (CopyTemplateOptions): 
 
   ### Returns
 
-  - `{:ok, Docspring.Model.Template.t}` on success
+  - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec copy_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Template.t} | {:error, Tesla.Env.t}
+  @spec copy_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
   def copy_template(connection, template_id, opts \\ []) do
     optional_params = %{
       :body => :body
@@ -206,7 +185,7 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.Template},
+      {200, Docspring.Model.TemplatePreview},
       {404, Docspring.Model.ErrorResponse}
     ])
   end
@@ -225,7 +204,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.CreateCustomFileResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_custom_file_from_upload(Tesla.Env.client, Docspring.Model.CreateCustomFileData.t, keyword()) :: {:ok, Docspring.Model.CreateCustomFileResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec create_custom_file_from_upload(Tesla.Env.client, Docspring.Model.CreateCustomFileData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateCustomFileResponse.t} | {:error, Tesla.Env.t}
   def create_custom_file_from_upload(connection, data, _opts \\ []) do
     request =
       %{}
@@ -238,7 +217,7 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.CreateCustomFileResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -257,7 +236,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.CreateSubmissionDataRequestEventResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_data_request_event(Tesla.Env.client, String.t, Docspring.Model.CreateSubmissionDataRequestEventRequest.t, keyword()) :: {:ok, Docspring.Model.CreateSubmissionDataRequestEventResponse.t} | {:ok, Docspring.Model.InvalidRequest.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec create_data_request_event(Tesla.Env.client, String.t, Docspring.Model.CreateSubmissionDataRequestEventRequest.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateSubmissionDataRequestEventResponse.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
   def create_data_request_event(connection, data_request_id, event, _opts \\ []) do
     request =
       %{}
@@ -270,8 +249,8 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.CreateSubmissionDataRequestEventResponse},
-      {401, Docspring.Model.AuthenticationError},
-      {422, Docspring.Model.InvalidRequest}
+      {401, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.MultipleErrorsResponse}
     ])
   end
 
@@ -283,18 +262,24 @@ defmodule Docspring.Api.PDF do
   - `connection` (Docspring.Connection): Connection to server
   - `data_request_id` (String.t): 
   - `opts` (keyword): Optional parameters
+    - `:type` (String.t): 
 
   ### Returns
 
   - `{:ok, Docspring.Model.CreateSubmissionDataRequestTokenResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_data_request_token(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.CreateSubmissionDataRequestTokenResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
-  def create_data_request_token(connection, data_request_id, _opts \\ []) do
+  @spec create_data_request_token(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.CreateSubmissionDataRequestTokenResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def create_data_request_token(connection, data_request_id, opts \\ []) do
+    optional_params = %{
+      :type => :query
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/data_requests/#{data_request_id}/tokens")
+      |> add_optional_params(optional_params, opts)
       |> ensure_body()
       |> Enum.into([])
 
@@ -302,7 +287,8 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.CreateSubmissionDataRequestTokenResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -320,7 +306,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.Folder.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_folder(Tesla.Env.client, Docspring.Model.CreateFolderData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec create_folder(Tesla.Env.client, Docspring.Model.CreateFolderData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
   def create_folder(connection, data, _opts \\ []) do
     request =
       %{}
@@ -332,10 +318,10 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {422, Docspring.Model.Folder},
+      {422, Docspring.Model.MultipleErrorsResponse},
       {404, Docspring.Model.ErrorResponse},
       {200, Docspring.Model.Folder},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -345,28 +331,28 @@ defmodule Docspring.Api.PDF do
   ### Parameters
 
   - `connection` (Docspring.Connection): Connection to server
-  - `data` (CreateHtmlTemplateData): 
+  - `data` (CreateHtmlTemplate): 
   - `opts` (keyword): Optional parameters
 
   ### Returns
 
-  - `{:ok, Docspring.Model.PendingTemplate.t}` on success
+  - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_html_template(Tesla.Env.client, Docspring.Model.CreateHtmlTemplateData.t, keyword()) :: {:ok, Docspring.Model.PendingTemplate.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec create_html_template(Tesla.Env.client, Docspring.Model.CreateHtmlTemplate.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
   def create_html_template(connection, data, _opts \\ []) do
     request =
       %{}
       |> method(:post)
-      |> url("/templates?desc&#x3D;html")
+      |> url("/templates?endpoint_description&#x3D;html")
       |> add_param(:body, :body, data)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {201, Docspring.Model.PendingTemplate},
-      {401, Docspring.Model.AuthenticationError}
+      {201, Docspring.Model.TemplatePreview},
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -379,16 +365,20 @@ defmodule Docspring.Api.PDF do
   - `template_left_square_bracketdocument_right_square_bracket` (String.t): 
   - `template_left_square_bracketname_right_square_bracket` (String.t): 
   - `opts` (keyword): Optional parameters
+    - `:wait` (boolean()): Wait for template document to be processed before returning. Set to false to return immediately. Default: true (on sync.* subdomain)
+    - `:"template[description]"` (String.t): 
     - `:"template[parent_folder_id]"` (String.t): 
 
   ### Returns
 
-  - `{:ok, Docspring.Model.PendingTemplate.t}` on success
+  - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_pdf_template(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.PendingTemplate.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec create_pdf_template(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
   def create_pdf_template(connection, template_left_square_bracketdocument_right_square_bracket, template_left_square_bracketname_right_square_bracket, opts \\ []) do
     optional_params = %{
+      :wait => :query,
+      :"template[description]" => :form,
       :"template[parent_folder_id]" => :form
     }
 
@@ -404,8 +394,8 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {201, Docspring.Model.PendingTemplate},
-      {401, Docspring.Model.AuthenticationError}
+      {201, Docspring.Model.TemplatePreview},
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -415,28 +405,28 @@ defmodule Docspring.Api.PDF do
   ### Parameters
 
   - `connection` (Docspring.Connection): Connection to server
-  - `data` (CreateTemplateFromUploadData): 
+  - `data` (CreatePdfTemplate): 
   - `opts` (keyword): Optional parameters
 
   ### Returns
 
-  - `{:ok, Docspring.Model.PendingTemplate.t}` on success
+  - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_pdf_template_from_upload(Tesla.Env.client, Docspring.Model.CreateTemplateFromUploadData.t, keyword()) :: {:ok, Docspring.Model.PendingTemplate.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec create_pdf_template_from_upload(Tesla.Env.client, Docspring.Model.CreatePdfTemplate.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
   def create_pdf_template_from_upload(connection, data, _opts \\ []) do
     request =
       %{}
       |> method(:post)
-      |> url("/templates?desc&#x3D;cached_upload")
+      |> url("/templates?endpoint_description&#x3D;cached_upload")
       |> add_param(:body, :body, data)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {201, Docspring.Model.PendingTemplate},
-      {401, Docspring.Model.AuthenticationError}
+      {201, Docspring.Model.TemplatePreview},
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -454,7 +444,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.Folder.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec delete_folder(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec delete_folder(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:error, Tesla.Env.t}
   def delete_folder(connection, folder_id, _opts \\ []) do
     request =
       %{}
@@ -468,7 +458,7 @@ defmodule Docspring.Api.PDF do
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {200, Docspring.Model.Folder},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -480,32 +470,26 @@ defmodule Docspring.Api.PDF do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): 
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): 
 
   ### Returns
 
-  - `{:ok, Docspring.Model.DeleteTemplateResponse.t}` on success
+  - `{:ok, Docspring.Model.SuccessMultipleErrorsResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec delete_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.DeleteTemplateResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
-  def delete_template(connection, template_id, opts \\ []) do
-    optional_params = %{
-      :version => :query
-    }
-
+  @spec delete_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def delete_template(connection, template_id, _opts \\ []) do
     request =
       %{}
       |> method(:delete)
       |> url("/templates/#{template_id}")
-      |> add_optional_params(optional_params, opts)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.DeleteTemplateResponse},
+      {200, Docspring.Model.SuccessMultipleErrorsResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -523,7 +507,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.CombinedSubmission.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec expire_combined_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CombinedSubmission.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec expire_combined_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CombinedSubmission.t} | {:error, Tesla.Env.t}
   def expire_combined_submission(connection, combined_submission_id, _opts \\ []) do
     request =
       %{}
@@ -537,7 +521,7 @@ defmodule Docspring.Api.PDF do
       {200, Docspring.Model.CombinedSubmission},
       {404, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -552,10 +536,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.Submission.t}` on success
+  - `{:ok, Docspring.Model.SubmissionPreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec expire_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec expire_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.SubmissionPreview.t} | {:error, Tesla.Env.t}
   def expire_submission(connection, submission_id, _opts \\ []) do
     request =
       %{}
@@ -566,9 +550,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.Submission},
+      {200, Docspring.Model.SubmissionPreview},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError},
+      {401, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse}
     ])
   end
@@ -580,30 +564,73 @@ defmodule Docspring.Api.PDF do
 
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): 
-  - `submission` (CreateSubmissionData): 
+  - `submission` (CreatePdfSubmissionData): 
   - `opts` (keyword): Optional parameters
+    - `:wait` (boolean()): Wait for submission to be processed before returning. Set to false to return immediately. Default: true (on sync.* subdomain)
 
   ### Returns
 
   - `{:ok, Docspring.Model.CreateSubmissionResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec generate_pdf(Tesla.Env.client, String.t, Docspring.Model.CreateSubmissionData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.InvalidRequest.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:ok, Docspring.Model.CreateSubmissionResponse.t} | {:error, Tesla.Env.t}
-  def generate_pdf(connection, template_id, submission, _opts \\ []) do
+  @spec generate_pdf(Tesla.Env.client, String.t, Docspring.Model.CreatePdfSubmissionData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateSubmissionResponse.t} | {:error, Tesla.Env.t}
+  def generate_pdf(connection, template_id, submission, opts \\ []) do
+    optional_params = %{
+      :wait => :query
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/submissions")
       |> add_param(:body, :body, submission)
+      |> add_optional_params(optional_params, opts)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.CreateSubmissionResponse},
-      {400, Docspring.Model.ErrorResponse},
-      {422, Docspring.Model.InvalidRequest},
-      {401, Docspring.Model.AuthenticationError}
+      {422, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {400, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Generates a new PDF for an HTML template
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): 
+  - `submission` (CreateHtmlSubmissionData): 
+  - `opts` (keyword): Optional parameters
+    - `:wait` (boolean()): Wait for submission to be processed before returning. Set to false to return immediately. Default: true (on sync.* subdomain)
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.CreateSubmissionResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec generate_pdf_for_html_template(Tesla.Env.client, String.t, Docspring.Model.CreateHtmlSubmissionData.t, keyword()) :: {:ok, Docspring.Model.CreateSubmissionResponse.t} | {:error, Tesla.Env.t}
+  def generate_pdf_for_html_template(connection, template_id, submission, opts \\ []) do
+    optional_params = %{
+      :wait => :query
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/submissions?endpoint_description&#x3D;html_templates")
+      |> add_param(:body, :body, submission)
+      |> add_optional_params(optional_params, opts)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.CreateSubmissionResponse}
     ])
   end
 
@@ -618,10 +645,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.PreviewPdfResponse.t}` on success
+  - `{:ok, Docspring.Model.SuccessErrorResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec generate_preview(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.PreviewPdfResponse.t} | {:error, Tesla.Env.t}
+  @spec generate_preview(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.SuccessErrorResponse.t} | {:error, Tesla.Env.t}
   def generate_preview(connection, submission_id, _opts \\ []) do
     request =
       %{}
@@ -633,9 +660,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.PreviewPdfResponse},
+      {200, Docspring.Model.SuccessErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {422, Docspring.Model.PreviewPdfResponse}
+      {422, Docspring.Model.SuccessErrorResponse}
     ])
   end
 
@@ -653,7 +680,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.CombinedSubmission.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_combined_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CombinedSubmission.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_combined_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CombinedSubmission.t} | {:error, Tesla.Env.t}
   def get_combined_submission(connection, combined_submission_id, _opts \\ []) do
     request =
       %{}
@@ -666,7 +693,7 @@ defmodule Docspring.Api.PDF do
     |> evaluate_response([
       {200, Docspring.Model.CombinedSubmission},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -681,10 +708,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.SubmissionDataRequest.t}` on success
+  - `{:ok, Docspring.Model.SubmissionDataRequestShow.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_data_request(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.SubmissionDataRequest.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_data_request(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.SubmissionDataRequestShow.t} | {:error, Tesla.Env.t}
   def get_data_request(connection, data_request_id, _opts \\ []) do
     request =
       %{}
@@ -695,9 +722,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.SubmissionDataRequest},
+      {200, Docspring.Model.SubmissionDataRequestShow},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -712,10 +739,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.FullTemplate.t}` on success
+  - `{:ok, Docspring.Model.Template.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_full_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.FullTemplate.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_full_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Template.t} | {:error, Tesla.Env.t}
   def get_full_template(connection, template_id, _opts \\ []) do
     request =
       %{}
@@ -726,9 +753,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.FullTemplate},
+      {200, Docspring.Model.Template},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -742,10 +769,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.UploadPresign.t}` on success
+  - `{:ok, Docspring.Model.UploadPresignResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_presign_url(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.AuthenticationError.t} | {:ok, Docspring.Model.UploadPresign.t} | {:error, Tesla.Env.t}
+  @spec get_presign_url(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.UploadPresignResponse.t} | {:error, Tesla.Env.t}
   def get_presign_url(connection, _opts \\ []) do
     request =
       %{}
@@ -756,8 +783,8 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.UploadPresign},
-      {401, Docspring.Model.AuthenticationError}
+      {200, Docspring.Model.UploadPresignResponse},
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -776,7 +803,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.Submission.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Submission.t} | {:error, Tesla.Env.t}
   def get_submission(connection, submission_id, opts \\ []) do
     optional_params = %{
       :include_data => :query
@@ -794,7 +821,7 @@ defmodule Docspring.Api.PDF do
     |> evaluate_response([
       {200, Docspring.Model.Submission},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -810,10 +837,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.SubmissionBatch.t}` on success
+  - `{:ok, Docspring.Model.SubmissionBatchWithSubmissions.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_submission_batch(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.SubmissionBatch.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_submission_batch(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.SubmissionBatchWithSubmissions.t} | {:error, Tesla.Env.t}
   def get_submission_batch(connection, submission_batch_id, opts \\ []) do
     optional_params = %{
       :include_submissions => :query
@@ -829,9 +856,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.SubmissionBatch},
+      {200, Docspring.Model.SubmissionBatchWithSubmissions},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -846,10 +873,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.Template.t}` on success
+  - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
   def get_template(connection, template_id, _opts \\ []) do
     request =
       %{}
@@ -860,9 +887,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.Template},
+      {200, Docspring.Model.TemplatePreview},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -877,10 +904,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.TemplateSchema.t}` on success
+  - `{:ok, Docspring.Model.JsonSchema.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec get_template_schema(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplateSchema.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec get_template_schema(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.JsonSchema.t} | {:error, Tesla.Env.t}
   def get_template_schema(connection, template_id, _opts \\ []) do
     request =
       %{}
@@ -891,9 +918,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.TemplateSchema},
+      {200, Docspring.Model.JsonSchema},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -912,7 +939,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, [%CombinedSubmission{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec list_combined_submissions(Tesla.Env.client, keyword()) :: {:ok, [Docspring.Model.CombinedSubmission.t]} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec list_combined_submissions(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, [Docspring.Model.CombinedSubmission.t]} | {:error, Tesla.Env.t}
   def list_combined_submissions(connection, opts \\ []) do
     optional_params = %{
       :page => :query,
@@ -930,7 +957,7 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.CombinedSubmission},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -948,7 +975,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, [%Folder{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec list_folders(Tesla.Env.client, keyword()) :: {:ok, [Docspring.Model.Folder.t]} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec list_folders(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, [Docspring.Model.Folder.t]} | {:error, Tesla.Env.t}
   def list_folders(connection, opts \\ []) do
     optional_params = %{
       :parent_folder_id => :query
@@ -965,7 +992,7 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.Folder},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -988,7 +1015,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.ListSubmissionsResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec list_submissions(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:ok, Docspring.Model.ListSubmissionsResponse.t} | {:error, Tesla.Env.t}
+  @spec list_submissions(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.ListSubmissionsResponse.t} | {:error, Tesla.Env.t}
   def list_submissions(connection, opts \\ []) do
     optional_params = %{
       :cursor => :query,
@@ -1010,8 +1037,8 @@ defmodule Docspring.Api.PDF do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.ListSubmissionsResponse},
-      {400, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {422, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1075,10 +1102,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, [%Template{}, ...]}` on success
+  - `{:ok, [%TemplatePreview{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec list_templates(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, [Docspring.Model.Template.t]} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec list_templates(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, [Docspring.Model.TemplatePreview.t]} | {:error, Tesla.Env.t}
   def list_templates(connection, opts \\ []) do
     optional_params = %{
       :query => :query,
@@ -1097,9 +1124,9 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.Template},
+      {200, Docspring.Model.TemplatePreview},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1118,7 +1145,7 @@ defmodule Docspring.Api.PDF do
   - `{:ok, Docspring.Model.Folder.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec move_folder_to_folder(Tesla.Env.client, String.t, Docspring.Model.MoveFolderData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec move_folder_to_folder(Tesla.Env.client, String.t, Docspring.Model.MoveFolderData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:error, Tesla.Env.t}
   def move_folder_to_folder(connection, folder_id, data, _opts \\ []) do
     request =
       %{}
@@ -1132,7 +1159,7 @@ defmodule Docspring.Api.PDF do
     |> evaluate_response([
       {404, Docspring.Model.ErrorResponse},
       {200, Docspring.Model.Folder},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1148,10 +1175,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.Template.t}` on success
+  - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec move_template_to_folder(Tesla.Env.client, String.t, Docspring.Model.MoveTemplateData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Template.t} | {:error, Tesla.Env.t}
+  @spec move_template_to_folder(Tesla.Env.client, String.t, Docspring.Model.MoveTemplateData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
   def move_template_to_folder(connection, template_id, data, _opts \\ []) do
     request =
       %{}
@@ -1163,42 +1190,8 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.Template},
+      {200, Docspring.Model.TemplatePreview},
       {404, Docspring.Model.ErrorResponse}
-    ])
-  end
-
-  @doc """
-  Publish a template version
-
-  ### Parameters
-
-  - `connection` (Docspring.Connection): Connection to server
-  - `template_id` (String.t): 
-  - `data` (PublishVersionData): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, Docspring.Model.PublishTemplateVersionResponse.t}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec publish_template_version(Tesla.Env.client, String.t, Docspring.Model.PublishVersionData.t, keyword()) :: {:ok, Docspring.Model.PublishTemplateVersionResponse.t} | {:ok, Docspring.Model.PublishTemplateVersion404Response.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:ok, Docspring.Model.PublishTemplateVersion422Response.t} | {:error, Tesla.Env.t}
-  def publish_template_version(connection, template_id, data, _opts \\ []) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/templates/#{template_id}/publish_version")
-      |> add_param(:body, :body, data)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response([
-      {200, Docspring.Model.PublishTemplateVersionResponse},
-      {422, Docspring.Model.PublishTemplateVersion422Response},
-      {404, Docspring.Model.PublishTemplateVersion404Response},
-      {401, Docspring.Model.AuthenticationError}
     ])
   end
 
@@ -1214,10 +1207,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, nil}` on success
+  - `{:ok, Docspring.Model.Folder.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec rename_folder(Tesla.Env.client, String.t, Docspring.Model.RenameFolderData.t, keyword()) :: {:ok, nil} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec rename_folder(Tesla.Env.client, String.t, Docspring.Model.RenameFolderData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
   def rename_folder(connection, folder_id, data, _opts \\ []) do
     request =
       %{}
@@ -1229,44 +1222,10 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {422, false},
-      {404, false},
-      {200, false},
-      {401, Docspring.Model.AuthenticationError}
-    ])
-  end
-
-  @doc """
-  Restore a template version
-
-  ### Parameters
-
-  - `connection` (Docspring.Connection): Connection to server
-  - `template_id` (String.t): 
-  - `data` (RestoreVersionData): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, Docspring.Model.RestoreTemplateVersionResponse.t}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec restore_template_version(Tesla.Env.client, String.t, Docspring.Model.RestoreVersionData.t, keyword()) :: {:ok, Docspring.Model.InvalidRequest.t} | {:ok, Docspring.Model.RestoreTemplateVersionResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
-  def restore_template_version(connection, template_id, data, _opts \\ []) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/templates/#{template_id}/restore_version")
-      |> add_param(:body, :body, data)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response([
-      {200, Docspring.Model.RestoreTemplateVersionResponse},
-      {422, Docspring.Model.InvalidRequest},
-      {404, Docspring.Model.InvalidRequest},
-      {401, Docspring.Model.AuthenticationError}
+      {422, Docspring.Model.MultipleErrorsResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {200, Docspring.Model.Folder},
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1280,10 +1239,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.AuthenticationSuccessResponse.t}` on success
+  - `{:ok, Docspring.Model.SuccessErrorResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec test_authentication(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.AuthenticationSuccessResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec test_authentication(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.SuccessErrorResponse.t} | {:error, Tesla.Env.t}
   def test_authentication(connection, _opts \\ []) do
     request =
       %{}
@@ -1294,8 +1253,8 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.AuthenticationSuccessResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {200, Docspring.Model.SuccessErrorResponse},
+      {401, Docspring.Model.SuccessErrorResponse}
     ])
   end
 
@@ -1311,10 +1270,10 @@ defmodule Docspring.Api.PDF do
 
   ### Returns
 
-  - `{:ok, Docspring.Model.UpdateDataRequestResponse.t}` on success
+  - `{:ok, Docspring.Model.CreateSubmissionDataRequestResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec update_data_request(Tesla.Env.client, String.t, Docspring.Model.UpdateSubmissionDataRequestData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.InvalidRequest.t} | {:ok, Docspring.Model.UpdateDataRequestResponse.t} | {:ok, Docspring.Model.AuthenticationError.t} | {:error, Tesla.Env.t}
+  @spec update_data_request(Tesla.Env.client, String.t, Docspring.Model.UpdateSubmissionDataRequestData.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateSubmissionDataRequestResponse.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
   def update_data_request(connection, data_request_id, data, _opts \\ []) do
     request =
       %{}
@@ -1326,10 +1285,10 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.UpdateDataRequestResponse},
-      {422, Docspring.Model.InvalidRequest},
+      {200, Docspring.Model.CreateSubmissionDataRequestResponse},
+      {422, Docspring.Model.MultipleErrorsResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.AuthenticationError}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1340,15 +1299,15 @@ defmodule Docspring.Api.PDF do
 
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): 
-  - `data` (UpdateTemplateData): 
+  - `data` (UpdateHtmlTemplate): 
   - `opts` (keyword): Optional parameters
 
   ### Returns
 
-  - `{:ok, Docspring.Model.UpdateTemplateResponse.t}` on success
+  - `{:ok, Docspring.Model.SuccessMultipleErrorsResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec update_template(Tesla.Env.client, String.t, Docspring.Model.UpdateTemplateData.t, keyword()) :: {:ok, Docspring.Model.UpdateTemplateResponse.t} | {:error, Tesla.Env.t}
+  @spec update_template(Tesla.Env.client, String.t, Docspring.Model.UpdateHtmlTemplate.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:error, Tesla.Env.t}
   def update_template(connection, template_id, data, _opts \\ []) do
     request =
       %{}
@@ -1360,7 +1319,7 @@ defmodule Docspring.Api.PDF do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.UpdateTemplateResponse}
+      {200, Docspring.Model.SuccessMultipleErrorsResponse}
     ])
   end
 end

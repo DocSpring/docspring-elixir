@@ -9,16 +9,12 @@ defmodule Docspring.Model.CreateSubmissionDataRequestEventRequest do
   @derive Jason.Encoder
   defstruct [
     :event_type,
-    :message_type,
-    :message_recipient,
-    :occurred_at
+    :message_type
   ]
 
   @type t :: %__MODULE__{
     :event_type => String.t,
-    :message_type => String.t | nil,
-    :message_recipient => String.t | nil,
-    :occurred_at => String.t | nil
+    :message_type => String.t | nil
   }
 
   def decode(value) do

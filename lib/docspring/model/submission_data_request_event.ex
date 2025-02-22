@@ -18,13 +18,13 @@ defmodule Docspring.Model.SubmissionDataRequestEvent do
   ]
 
   @type t :: %__MODULE__{
-    :id => String.t,
-    :submission_id => String.t,
-    :submission_data_request_id => String.t,
+    :id => String.t | nil,
+    :submission_id => String.t | nil,
+    :submission_data_request_id => String.t | nil,
     :event_type => String.t,
-    :message_type => String.t | nil,
+    :message_type => String.t,
     :message_recipient => String.t | nil,
-    :occurred_at => String.t
+    :occurred_at => String.t | nil
   }
 
   def decode(value) do

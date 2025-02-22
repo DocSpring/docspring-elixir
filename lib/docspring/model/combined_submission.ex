@@ -9,34 +9,36 @@ defmodule Docspring.Model.CombinedSubmission do
   @derive Jason.Encoder
   defstruct [
     :id,
+    :state,
     :expired,
     :expires_in,
     :expires_at,
-    :state,
+    :processed_at,
     :error_message,
-    :metadata,
-    :password,
     :submission_ids,
     :source_pdfs,
-    :download_url,
+    :metadata,
+    :password,
     :pdf_hash,
+    :download_url,
     :actions
   ]
 
   @type t :: %__MODULE__{
-    :id => String.t,
+    :id => String.t | nil,
+    :state => String.t,
     :expired => boolean(),
     :expires_in => integer() | nil,
     :expires_at => String.t | nil,
-    :state => String.t,
+    :processed_at => String.t | nil,
     :error_message => String.t | nil,
-    :metadata => map() | nil,
-    :password => String.t | nil,
     :submission_ids => [String.t],
     :source_pdfs => [map()],
-    :download_url => String.t | nil,
+    :metadata => map(),
+    :password => String.t | nil,
     :pdf_hash => String.t | nil,
-    :actions => [Docspring.Model.CombinedSubmissionAction.t] | nil
+    :download_url => String.t | nil,
+    :actions => [Docspring.Model.CombinedSubmissionAction.t]
   }
 
   alias Docspring.Deserializer

@@ -9,21 +9,21 @@ defmodule Docspring.Model.CreateSubmissionResponse do
   @derive Jason.Encoder
   defstruct [
     :status,
-    :errors,
-    :submission
+    :submission,
+    :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
-    :errors => [String.t] | nil,
-    :submission => Docspring.Model.Submission.t
+    :submission => Docspring.Model.SubmissionPreview.t,
+    :errors => [String.t] | nil
   }
 
   alias Docspring.Deserializer
 
   def decode(value) do
     value
-     |> Deserializer.deserialize(:submission, :struct, Docspring.Model.Submission)
+     |> Deserializer.deserialize(:submission, :struct, Docspring.Model.SubmissionPreview)
   end
 end
 

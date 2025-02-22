@@ -8,34 +8,18 @@ defmodule Docspring.Model.CreateSubmissionDataRequestData do
 
   @derive Jason.Encoder
   defstruct [
-    :auth_phone_number_hash,
-    :auth_provider,
     :auth_second_factor_type,
-    :auth_session_id_hash,
-    :auth_session_started_at,
     :auth_type,
-    :auth_user_id_hash,
-    :auth_username_hash,
-    :email,
     :fields,
     :metadata,
-    :name,
     :order
   ]
 
   @type t :: %__MODULE__{
-    :auth_phone_number_hash => String.t | nil,
-    :auth_provider => String.t | nil,
     :auth_second_factor_type => String.t | nil,
-    :auth_session_id_hash => String.t | nil,
-    :auth_session_started_at => String.t | nil,
-    :auth_type => String.t,
-    :auth_user_id_hash => String.t | nil,
-    :auth_username_hash => String.t | nil,
-    :email => String.t | nil,
+    :auth_type => String.t | nil,
     :fields => [String.t] | nil,
     :metadata => map() | nil,
-    :name => String.t | nil,
     :order => integer() | nil
   }
 

@@ -9,21 +9,21 @@ defmodule Docspring.Model.CreateSubmissionDataRequestTokenResponse do
   @derive Jason.Encoder
   defstruct [
     :status,
-    :errors,
-    :token
+    :token,
+    :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
-    :errors => [String.t] | nil,
-    :token => Docspring.Model.DataRequestToken.t
+    :token => Docspring.Model.SubmissionDataRequestToken.t,
+    :errors => [String.t] | nil
   }
 
   alias Docspring.Deserializer
 
   def decode(value) do
     value
-     |> Deserializer.deserialize(:token, :struct, Docspring.Model.DataRequestToken)
+     |> Deserializer.deserialize(:token, :struct, Docspring.Model.SubmissionDataRequestToken)
   end
 end
 

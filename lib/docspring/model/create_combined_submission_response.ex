@@ -9,14 +9,14 @@ defmodule Docspring.Model.CreateCombinedSubmissionResponse do
   @derive Jason.Encoder
   defstruct [
     :status,
-    :errors,
-    :combined_submission
+    :combined_submission,
+    :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
-    :errors => [String.t] | nil,
-    :combined_submission => Docspring.Model.CombinedSubmission.t
+    :combined_submission => Docspring.Model.CombinedSubmission.t,
+    :errors => [String.t] | nil
   }
 
   alias Docspring.Deserializer

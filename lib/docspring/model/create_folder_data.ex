@@ -12,14 +12,11 @@ defmodule Docspring.Model.CreateFolderData do
   ]
 
   @type t :: %__MODULE__{
-    :folder => Docspring.Model.CreateFolderAttributes.t
+    :folder => map()
   }
-
-  alias Docspring.Deserializer
 
   def decode(value) do
     value
-     |> Deserializer.deserialize(:folder, :struct, Docspring.Model.CreateFolderAttributes)
   end
 end
 

@@ -11,17 +11,17 @@ defmodule Docspring.Model.SubmissionAction do
     :id,
     :integration_id,
     :state,
-    :action_category,
     :action_type,
+    :action_category,
     :result_data
   ]
 
   @type t :: %__MODULE__{
-    :id => String.t,
+    :id => String.t | nil,
     :integration_id => String.t | nil,
     :state => String.t,
-    :action_category => String.t,
     :action_type => String.t,
+    :action_category => String.t,
     :result_data => map()
   }
 

@@ -9,18 +9,21 @@ defmodule Docspring.Model.CreateCustomFileResponse do
   @derive Jason.Encoder
   defstruct [
     :status,
-    :errors,
-    :custom_file
+    :custom_file,
+    :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
-    :errors => [String.t] | nil,
-    :custom_file => map()
+    :custom_file => Docspring.Model.CustomFile.t,
+    :errors => [String.t] | nil
   }
+
+  alias Docspring.Deserializer
 
   def decode(value) do
     value
+     |> Deserializer.deserialize(:custom_file, :struct, Docspring.Model.CustomFile)
   end
 end
 
