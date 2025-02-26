@@ -592,8 +592,7 @@ defmodule Docspring.Api.PDF do
     |> evaluate_response([
       {201, Docspring.Model.CreateSubmissionResponse},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse},
-      {400, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse}
     ])
   end
 

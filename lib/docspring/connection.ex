@@ -87,7 +87,7 @@ defmodule Docspring.Connection do
 
   Tesla.Env.client
   """
-  @spec new(String.t(), String.t()), options) :: Tesla.Env.client()
+  @spec new(String.t(), String.t(), options) :: Tesla.Env.client()
 
 
   def new(username, password, options) when is_binary(username) and is_binary(password) do
@@ -119,7 +119,7 @@ defmodule Docspring.Connection do
         Keyword.get(
           tesla_options,
           :user_agent,
-          "openapi-generator - Docspring 1.0.0 - elixir"
+          "docspring-elixir-2.0.0"
         )
       )
 

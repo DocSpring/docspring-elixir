@@ -10,6 +10,7 @@ defmodule Docspring.Model.CreatePdfSubmissionData do
   defstruct [
     :data,
     :data_requests,
+    :editable,
     :expires_in,
     :field_overrides,
     :metadata,
@@ -20,6 +21,7 @@ defmodule Docspring.Model.CreatePdfSubmissionData do
   @type t :: %__MODULE__{
     :data => map(),
     :data_requests => [Docspring.Model.CreateSubmissionDataRequestData.t] | nil,
+    :editable => boolean() | nil,
     :expires_in => integer() | nil,
     :field_overrides => map() | nil,
     :metadata => map() | nil,

@@ -10,6 +10,7 @@ defmodule Docspring.Model.CreateHtmlSubmissionData do
   defstruct [
     :css,
     :data,
+    :editable,
     :expires_in,
     :field_overrides,
     :html,
@@ -21,6 +22,7 @@ defmodule Docspring.Model.CreateHtmlSubmissionData do
   @type t :: %__MODULE__{
     :css => String.t | nil,
     :data => map() | nil,
+    :editable => boolean() | nil,
     :expires_in => integer() | nil,
     :field_overrides => map() | nil,
     :html => String.t | nil,
