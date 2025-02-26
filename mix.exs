@@ -46,6 +46,7 @@ defmodule Docspring.Mixfile do
       [
         name: "docspring",
         files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
-      ]
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/DocSpring/docspring-elixir"}      ]
   end
 end
