@@ -42,8 +42,14 @@ defmodule Docspring.Model.TemplatePreview do
     :slack_webhook_url,
     :template_type,
     :updated_at,
+    :version_published_at,
+    :version,
     :webhook_url,
-    :demo
+    :demo,
+    :latest_version,
+    :last_changed_at,
+    :last_changed_by_type,
+    :last_changed_by_id
   ]
 
   @type t :: %__MODULE__{
@@ -81,8 +87,14 @@ defmodule Docspring.Model.TemplatePreview do
     :slack_webhook_url => String.t | nil,
     :template_type => String.t,
     :updated_at => String.t | nil,
+    :version_published_at => String.t | nil,
+    :version => String.t | nil,
     :webhook_url => String.t | nil,
-    :demo => boolean()
+    :demo => boolean(),
+    :latest_version => String.t | nil,
+    :last_changed_at => String.t | nil,
+    :last_changed_by_type => String.t | nil,
+    :last_changed_by_id => String.t | nil
   }
 
   def decode(value) do

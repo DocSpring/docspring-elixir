@@ -42,8 +42,14 @@ defmodule Docspring.Model.Template do
     :slack_webhook_url,
     :template_type,
     :updated_at,
+    :version_published_at,
+    :version,
     :webhook_url,
     :demo,
+    :latest_version,
+    :last_changed_at,
+    :last_changed_by_type,
+    :last_changed_by_id,
     :defaults,
     :field_order,
     :fields,
@@ -53,7 +59,8 @@ defmodule Docspring.Model.Template do
     :html,
     :predefined_fields,
     :scss,
-    :shared_field_data
+    :shared_field_data,
+    :versions
   ]
 
   @type t :: %__MODULE__{
@@ -91,8 +98,14 @@ defmodule Docspring.Model.Template do
     :slack_webhook_url => String.t | nil,
     :template_type => String.t,
     :updated_at => String.t | nil,
+    :version_published_at => String.t | nil,
+    :version => String.t | nil,
     :webhook_url => String.t | nil,
     :demo => boolean(),
+    :latest_version => String.t | nil,
+    :last_changed_at => String.t | nil,
+    :last_changed_by_type => String.t | nil,
+    :last_changed_by_id => String.t | nil,
     :defaults => map(),
     :field_order => [[float()]],
     :fields => map(),
@@ -102,7 +115,8 @@ defmodule Docspring.Model.Template do
     :html => String.t | nil,
     :predefined_fields => [map()],
     :scss => String.t | nil,
-    :shared_field_data => map()
+    :shared_field_data => map(),
+    :versions => [map()]
   }
 
   def decode(value) do

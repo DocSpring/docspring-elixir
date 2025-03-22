@@ -470,24 +470,30 @@ defmodule Docspring.Api.PDF do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): 
   - `opts` (keyword): Optional parameters
+    - `:version` (String.t): 
 
   ### Returns
 
-  - `{:ok, Docspring.Model.SuccessMultipleErrorsResponse.t}` on success
+  - `{:ok, Docspring.Model.TemplateDeleteResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec delete_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def delete_template(connection, template_id, _opts \\ []) do
+  @spec delete_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplateDeleteResponse.t} | {:error, Tesla.Env.t}
+  def delete_template(connection, template_id, opts \\ []) do
+    optional_params = %{
+      :version => :query
+    }
+
     request =
       %{}
       |> method(:delete)
       |> url("/templates/#{template_id}")
+      |> add_optional_params(optional_params, opts)
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.SuccessMultipleErrorsResponse},
+      {200, Docspring.Model.TemplateDeleteResponse},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -728,7 +734,7 @@ defmodule Docspring.Api.PDF do
   end
 
   @doc """
-  Fetch the full template attributes
+  Fetch the full attributes for a PDF template
 
   ### Parameters
 
@@ -1195,6 +1201,40 @@ defmodule Docspring.Api.PDF do
   end
 
   @doc """
+  Publish a template version
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): 
+  - `data` (PublishVersionData): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplatePublishVersionResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec publish_template_version(Tesla.Env.client, String.t, Docspring.Model.PublishVersionData.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePublishVersionResponse.t} | {:error, Tesla.Env.t}
+  def publish_template_version(connection, template_id, data, _opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/publish_version")
+      |> add_param(:body, :body, data)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplatePublishVersionResponse},
+      {422, Docspring.Model.SuccessMultipleErrorsResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Rename a folder
 
   ### Parameters
@@ -1224,6 +1264,40 @@ defmodule Docspring.Api.PDF do
       {422, Docspring.Model.MultipleErrorsResponse},
       {404, Docspring.Model.ErrorResponse},
       {200, Docspring.Model.Folder},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Restore a template version
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): 
+  - `data` (RestoreVersionData): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.SuccessErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec restore_template_version(Tesla.Env.client, String.t, Docspring.Model.RestoreVersionData.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.SuccessErrorResponse.t} | {:error, Tesla.Env.t}
+  def restore_template_version(connection, template_id, data, _opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/restore_version")
+      |> add_param(:body, :body, data)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.SuccessErrorResponse},
+      {422, Docspring.Model.SuccessMultipleErrorsResponse},
+      {404, Docspring.Model.SuccessMultipleErrorsResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end

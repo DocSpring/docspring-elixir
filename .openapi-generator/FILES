@@ -35,7 +35,9 @@ lib/docspring/model/list_submissions_response.ex
 lib/docspring/model/move_folder_data.ex
 lib/docspring/model/move_template_data.ex
 lib/docspring/model/multiple_errors_response.ex
+lib/docspring/model/publish_version_data.ex
 lib/docspring/model/rename_folder_data.ex
+lib/docspring/model/restore_version_data.ex
 lib/docspring/model/submission.ex
 lib/docspring/model/submission_action.ex
 lib/docspring/model/submission_batch.ex
@@ -50,7 +52,9 @@ lib/docspring/model/success_error_response.ex
 lib/docspring/model/success_multiple_errors_response.ex
 lib/docspring/model/template.ex
 lib/docspring/model/template_add_fields_response.ex
+lib/docspring/model/template_delete_response.ex
 lib/docspring/model/template_preview.ex
+lib/docspring/model/template_publish_version_response.ex
 lib/docspring/model/update_html_template.ex
 lib/docspring/model/update_submission_data_request_data.ex
 lib/docspring/model/upload_presign_response.ex

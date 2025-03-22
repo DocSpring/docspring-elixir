@@ -22,7 +22,7 @@ defmodule Docspring.Model.SubmissionDataRequestEvent do
     :submission_id => String.t | nil,
     :submission_data_request_id => String.t | nil,
     :event_type => String.t,
-    :message_type => String.t,
+    :message_type => String.t | nil,
     :message_recipient => String.t | nil,
     :occurred_at => String.t | nil
   }

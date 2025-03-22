@@ -15,7 +15,8 @@ defmodule Docspring.Model.CreatePdfSubmissionData do
     :field_overrides,
     :metadata,
     :password,
-    :test
+    :test,
+    :version
   ]
 
   @type t :: %__MODULE__{
@@ -26,7 +27,8 @@ defmodule Docspring.Model.CreatePdfSubmissionData do
     :field_overrides => map() | nil,
     :metadata => map() | nil,
     :password => String.t | nil,
-    :test => boolean() | nil
+    :test => boolean() | nil,
+    :version => String.t | nil
   }
 
   alias Docspring.Deserializer

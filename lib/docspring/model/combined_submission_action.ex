@@ -20,7 +20,7 @@ defmodule Docspring.Model.CombinedSubmissionAction do
     :id => String.t | nil,
     :integration_id => String.t | nil,
     :state => String.t,
-    :action_type => String.t,
+    :action_type => String.t | nil,
     :action_category => String.t,
     :result_data => map()
   }

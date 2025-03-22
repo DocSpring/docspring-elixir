@@ -16,7 +16,8 @@ defmodule Docspring.Model.CreateHtmlSubmissionData do
     :html,
     :metadata,
     :password,
-    :test
+    :test,
+    :version
   ]
 
   @type t :: %__MODULE__{
@@ -28,7 +29,8 @@ defmodule Docspring.Model.CreateHtmlSubmissionData do
     :html => String.t | nil,
     :metadata => map() | nil,
     :password => String.t | nil,
-    :test => boolean() | nil
+    :test => boolean() | nil,
+    :version => String.t | nil
   }
 
   def decode(value) do
