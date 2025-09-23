@@ -1,6 +1,6 @@
 # Docspring
 
-DocSpring provides an API that helps you fill out and sign PDF templates.
+Use DocSpring&#39;s API to programmatically fill out PDF forms, convert HTML to PDFs, merge PDFs, or request legally binding e-signatures.
 
 ## Building
 
@@ -18,7 +18,7 @@ your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:docspring, "~> 2.1.0"}]
+  [{:docspring, "~> 3.0.0"}]
 end
 ```
 

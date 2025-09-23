@@ -1,3 +1,7 @@
+### 3.0.0 [September 24, 2025]
+
+- All our API clients are now 100% end-to-end tested against our real server.
+
 ### 2.1.0 [March 22, 2025]
 
 - Added support for Template Versioning parameters:

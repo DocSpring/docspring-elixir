@@ -4,13 +4,13 @@ defmodule Docspring.Mixfile do
   def project do
     [
       app: :docspring,
-      version: "2.1.0",
-      elixir: "~> 1.10",
+      version: "3.0.0",
+      elixir: "~> 1.18",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
       description: """
-      DocSpring provides an API that helps you fill out and sign PDF templates.
+      Use DocSpring&#39;s API to programmatically fill out PDF forms, convert HTML to PDFs, merge PDFs, or request legally binding e-signatures.
       """,
       deps: deps()
     ]
@@ -35,10 +35,10 @@ defmodule Docspring.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:tesla, "~> 1.7"},
+      {:tesla, "~> 1.14"},
       {:jason, "~> 1.4"},
-      {:ex_doc, "~> 0.30", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.3", only: [:dev, :test], runtime: false}
+      {:ex_doc, "~> 0.37.3", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 

@@ -13,3 +13,6 @@ config :docspring, base_url: "https://sync.api.docspring.com/api/v1"
 # of this file so it overrides the configuration defined above.
 #
 # import_config "#{config_env()}.exs"
+
+config :tesla, Docspring.Connection, json: Jason
+config :tesla, disable_deprecated_builder_warning: true
