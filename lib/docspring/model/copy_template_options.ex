@@ -9,12 +9,14 @@ defmodule Docspring.Model.CopyTemplateOptions do
   @derive JSON.Encoder
   defstruct [
     :name,
-    :parent_folder_id
+    :parent_folder_id,
+    :version
   ]
 
   @type t :: %__MODULE__{
     :name => String.t | nil,
-    :parent_folder_id => String.t
+    :parent_folder_id => String.t | nil,
+    :version => String.t | nil
   }
 
   def decode(value) do

@@ -44,7 +44,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Generate multiple PDFs
-  Generates up to 50 PDFs in a single request. Each submission can use a different template and data. Supports both synchronous (wait for all PDFs) and asynchronous processing. More efficient than individual requests when creating multiple PDFs.  See also: - [Batch and Combine PDFs](https://docspring.com/docs/api-guide/generate-pdfs/batch-generate-pdfs/) - Generate and merge PDFs in one request 
+  Generates up to 50 PDFs in a single request. Each submission can use a different template and data. Supports both synchronous (wait for all PDFs) and asynchronous processing. More efficient than individual requests when creating multiple PDFs.  See also: - [Batch Generate PDFs](https://docspring.com/docs/api-guide/generate-pdfs/batch-generate-pdfs/) - Request format, responses, and limits 
 
   ### Parameters
 
@@ -112,6 +112,7 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {201, Docspring.Model.CreateCombinedSubmissionResponse},
       {422, Docspring.Model.MultipleErrorsResponse},
+      {403, Docspring.Model.ErrorResponse},
       {400, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -223,7 +224,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Create a new data request token for form authentication
-  Creates an authentication token for accessing a data request form. Tokens can be created for API access (1 hour expiration) or email links (30 day expiration). Returns a token and a pre-authenticated URL for the data request form.  See also: - [Embedded Data Requests Guide](https://docspring.com/docs/guides/embedded-forms/embedded-data-requests/) 
+  Creates an authentication token for accessing a data request form. Returns a token and a pre-authenticated URL for the data request form. The token remains valid until the data request is completed.  See also: - [Embedded Data Requests Guide](https://docspring.com/docs/guides/embedded-forms/embedded-data-requests/) 
 
   ### Parameters
 
@@ -403,6 +404,39 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Create a webhook
+  Creates a webhook that delivers a POST request to your endpoint whenever a subscribed event occurs. Optionally scope the webhook to specific API tokens, templates, or folders. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `data` (CreateWebhookData): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.Webhook.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec create_webhook(Tesla.Env.client, Docspring.Model.CreateWebhookData.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.MultipleErrorsResponse.t} | {:error, Tesla.Env.t}
+  def create_webhook(connection, data, _opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/webhooks")
+      |> add_param(:body, :body, data)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.Webhook},
+      {422, Docspring.Model.MultipleErrorsResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Delete a folder
   Deletes an empty folder. The folder must not contain any templates or subfolders. Move or delete all contents before attempting to delete the folder. 
 
@@ -468,6 +502,38 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.TemplateDeleteResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Delete a webhook
+  Permanently deletes a webhook so it stops receiving events, and returns the deleted webhook.
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `webhook_id` (String.t): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.Webhook.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec delete_webhook(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def delete_webhook(connection, webhook_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:delete)
+      |> url("/webhooks/#{webhook_id}")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.Webhook},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -541,7 +607,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Generate a PDF
-  Creates a PDF submission by filling in a template with data. Supports both synchronous (default) and asynchronous processing. Set `wait: false` to return immediately.  See also: - [Customize the PDF Title and Filename](https://docspring.com/docs/api-guide/generate-pdfs/customize-pdf-title-and-filename/) - Set custom metadata - [Handling Truncated Text](https://docspring.com/docs/api-guide/generate-pdfs/handle-truncated-text/) - Handle text that doesn't fit in fields 
+  Creates a PDF submission by filling in a template with data. Supports both synchronous (default) and asynchronous processing. Add the `wait=false` query parameter to return immediately.  See also: - [Customize the PDF Title and Filename](https://docspring.com/docs/api-guide/generate-pdfs/customize-pdf-title-and-filename/) - Set custom metadata - [Handling Truncated Text](https://docspring.com/docs/api-guide/generate-pdfs/handle-truncated-text/) - Handle text that doesn't fit in fields 
 
   ### Parameters
 
@@ -847,6 +913,41 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Generate typed model code for a template
+  Generates typed model code for a template's submission data from its JSON schema, in TypeScript, JavaScript, Ruby, Python, PHP, Java, C#, Elixir or Go. Build your submission data with the generated types so your app catches mistakes before it calls the API.  `root_type_name` is the type that describes the whole submission data object, qualified with its namespace or package where there is one. Java returns every class in `code`, each under a `// ClassName.java` comment: split them into one file per class.  A template with no named fields returns 422, since there are no types to generate.  See also: - [Generate Model Code](https://docspring.com/docs/template-editor/generate-model-code/) - Use the generated types 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): 
+  - `lang` (String.t): The language to generate code for
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateModelCodeResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_template_model_code(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplateModelCodeResponse.t} | {:error, Tesla.Env.t}
+  def get_template_model_code(connection, template_id, lang, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/model_code")
+      |> add_param(:query, :lang, lang)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplateModelCodeResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Fetch the JSON schema for a template
   Retrieves the JSON Schema definition for a template's fields. Use this to validate data before submitting it for PDF generation, or to build dynamic forms that match the template's field structure and validation requirements.  See also: - [Generate PDFs Guide](https://docspring.com/docs/api-guide/generate-pdfs/generate-pdfs-via-api/) - Use schema to validate submission data 
 
@@ -873,6 +974,38 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.JsonSchema},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get a webhook
+  Retrieves a single webhook by its ID.
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `webhook_id` (String.t): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.Webhook.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_webhook(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_webhook(connection, webhook_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/webhooks/#{webhook_id}")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.Webhook},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -1085,6 +1218,54 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.TemplatePreview},
       {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get a list of all webhooks
+  Returns a list of the webhooks configured for your account. Supports pagination and filtering by event type, mode, and the API token, template, or folder a webhook is scoped to. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `opts` (keyword): Optional parameters
+    - `:page` (integer()): Default: 1
+    - `:per_page` (integer()): Default: 50
+    - `:event_type` (String.t): Filter by a subscribed event type
+    - `:mode` (String.t): Filter by mode (test or live)
+    - `:template_id` (String.t): Filter by a scoped template ID
+    - `:folder_id` (String.t): Filter by a scoped folder ID
+    - `:api_token_id` (String.t): Filter by a scoped API token ID
+
+  ### Returns
+
+  - `{:ok, [%Webhook{}, ...]}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec list_webhooks(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, [Docspring.Model.Webhook.t]} | {:error, Tesla.Env.t}
+  def list_webhooks(connection, opts \\ []) do
+    optional_params = %{
+      :page => :query,
+      :per_page => :query,
+      :event_type => :query,
+      :mode => :query,
+      :template_id => :query,
+      :folder_id => :query,
+      :api_token_id => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/webhooks")
+      |> add_optional_params(optional_params, opts)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.Webhook},
       {401, Docspring.Model.ErrorResponse}
     ])
   end
@@ -1328,7 +1509,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Update a Template
-  Updates template content and properties. For HTML templates, you can modify the HTML, SCSS, headers, footers, name, and description. Changes are applied to your draft template and do not affect published template versions. 
+  Updates template content and properties. For HTML templates, you can modify the HTML, SCSS, headers, footers, name, and description. Changes are applied to your draft template and do not affect published template versions. The exception is `parent_folder_id`: moving the template to another folder moves its published versions too. 
 
   ### Parameters
 
@@ -1342,7 +1523,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.SuccessMultipleErrorsResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec update_template(Tesla.Env.client, String.t, Docspring.Model.UpdateHtmlTemplate.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:error, Tesla.Env.t}
+  @spec update_template(Tesla.Env.client, String.t, Docspring.Model.UpdateHtmlTemplate.t, keyword()) :: {:ok, Docspring.Model.SuccessMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def update_template(connection, template_id, data, _opts \\ []) do
     request =
       %{}
@@ -1354,7 +1535,8 @@ defmodule Docspring.Api.Client do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, Docspring.Model.SuccessMultipleErrorsResponse}
+      {200, Docspring.Model.SuccessMultipleErrorsResponse},
+      {404, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1426,6 +1608,40 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.SuccessMultipleErrorsResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Update a webhook
+  Updates the configuration of an existing webhook.
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `webhook_id` (String.t): 
+  - `data` (UpdateWebhookData): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.Webhook.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec update_webhook(Tesla.Env.client, String.t, Docspring.Model.UpdateWebhookData.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def update_webhook(connection, webhook_id, data, _opts \\ []) do
+    request =
+      %{}
+      |> method(:put)
+      |> url("/webhooks/#{webhook_id}")
+      |> add_param(:body, :body, data)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.Webhook},
+      {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end

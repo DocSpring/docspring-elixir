@@ -11,6 +11,7 @@ defmodule Docspring.Model.Submission do
     :batch_id,
     :data_requests,
     :editable,
+    :error_message,
     :expired,
     :expires_at,
     :id,
@@ -40,6 +41,7 @@ defmodule Docspring.Model.Submission do
     :batch_id => String.t | nil,
     :data_requests => [Docspring.Model.SubmissionDataRequest.t],
     :editable => boolean() | nil,
+    :error_message => String.t | nil,
     :expired => boolean(),
     :expires_at => String.t | nil,
     :id => String.t | nil,
@@ -60,7 +62,7 @@ defmodule Docspring.Model.Submission do
     :preview_generated_at => String.t | nil,
     :audit_trail_download_url => String.t | nil,
     :actions => [Docspring.Model.SubmissionAction.t],
-    :source => String.t,
+    :source => String.t | nil,
     :referrer => String.t | nil,
     :data => map() | nil
   }

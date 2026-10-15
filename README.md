@@ -18,7 +18,7 @@ your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:docspring, "~> 3.0.0"}]
+  [{:docspring, "~> 3.1.0"}]
 end
 ```
 

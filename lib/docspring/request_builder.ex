@@ -95,7 +95,7 @@ defmodule Docspring.RequestBuilder do
     |> Map.update!(:body, fn multipart ->
       Tesla.Multipart.add_field(
         multipart,
-        key,
+        to_string(key),
         JSON.encode!(value),
         headers: [{:"Content-Type", "application/json"}]
       )
@@ -114,7 +114,7 @@ defmodule Docspring.RequestBuilder do
   def add_param(request, :file, name, path) do
     request
     |> Map.put_new_lazy(:body, &Tesla.Multipart.new/0)
-    |> Map.update!(:body, &(Tesla.Multipart.add_file(&1, path, name: name)))
+    |> Map.update!(:body, &(Tesla.Multipart.add_file(&1, path, name: to_string(name))))
   end
 
   def add_param(request, :form, name, value) do
@@ -123,7 +123,7 @@ defmodule Docspring.RequestBuilder do
     else
       case Map.get(request, :body) do
         %Tesla.Multipart{} ->
-          Map.update!(request, :body, &Tesla.Multipart.add_field(&1, name, to_string(value)))
+          Map.update!(request, :body, &Tesla.Multipart.add_field(&1, to_string(name), to_string(value)))
         _ ->
           Map.update(request, :body, %{name => value}, &(Map.put(&1, name, value)))
       end

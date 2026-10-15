@@ -19,6 +19,9 @@ defmodule Docspring.Model.TemplatePreview do
     :document_url,
     :editable_submissions,
     :embed_domains,
+    :embed_edit_allow_settings,
+    :embed_edit_allow_versioning,
+    :embed_edit_allow_document_replacement,
     :encrypt_pdfs_password,
     :encrypt_pdfs,
     :expiration_interval,
@@ -45,11 +48,15 @@ defmodule Docspring.Model.TemplatePreview do
     :version_published_at,
     :version,
     :webhook_url,
+    :embed_edit_token,
     :demo,
     :latest_version,
     :last_changed_at,
     :last_changed_by_type,
-    :last_changed_by_id
+    :last_changed_by_id,
+    :last_changed_by_external_name,
+    :last_changed_by_external_email,
+    :last_changed_by_external_id
   ]
 
   @type t :: %__MODULE__{
@@ -64,6 +71,9 @@ defmodule Docspring.Model.TemplatePreview do
     :document_url => String.t | nil,
     :editable_submissions => boolean(),
     :embed_domains => String.t | nil,
+    :embed_edit_allow_settings => boolean(),
+    :embed_edit_allow_versioning => boolean(),
+    :embed_edit_allow_document_replacement => boolean(),
     :encrypt_pdfs_password => String.t | nil,
     :encrypt_pdfs => boolean(),
     :expiration_interval => String.t,
@@ -79,7 +89,7 @@ defmodule Docspring.Model.TemplatePreview do
     :page_count => integer(),
     :page_dimensions => [[number()]] | nil,
     :parent_folder_id => String.t | nil,
-    :path => String.t | nil,
+    :path => String.t,
     :permanent_document_url => String.t | nil,
     :public_submissions => boolean(),
     :public_web_form => boolean(),
@@ -90,11 +100,15 @@ defmodule Docspring.Model.TemplatePreview do
     :version_published_at => String.t | nil,
     :version => String.t | nil,
     :webhook_url => String.t | nil,
+    :embed_edit_token => String.t | nil,
     :demo => boolean(),
     :latest_version => String.t | nil,
     :last_changed_at => String.t | nil,
     :last_changed_by_type => String.t | nil,
-    :last_changed_by_id => String.t | nil
+    :last_changed_by_id => String.t | nil,
+    :last_changed_by_external_name => String.t | nil,
+    :last_changed_by_external_email => String.t | nil,
+    :last_changed_by_external_id => String.t | nil
   }
 
   def decode(value) do

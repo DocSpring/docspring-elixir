@@ -10,25 +10,31 @@ defmodule Docspring.Model.JsonSchema do
   defstruct [
     :"$schema",
     :id,
+    :"$id",
     :title,
     :description,
     :definitions,
     :type,
     :properties,
     :additionalProperties,
-    :required
+    :required,
+    :dependencies,
+    :allOf
   ]
 
   @type t :: %__MODULE__{
     :"$schema" => String.t | nil,
     :id => String.t | nil,
+    :"$id" => String.t | nil,
     :title => String.t | nil,
     :description => String.t | nil,
     :definitions => map() | nil,
     :type => String.t | nil,
     :properties => map() | nil,
     :additionalProperties => boolean() | nil,
-    :required => [String.t] | nil
+    :required => [String.t] | nil,
+    :dependencies => map() | nil,
+    :allOf => [map()] | nil
   }
 
   def decode(value) do

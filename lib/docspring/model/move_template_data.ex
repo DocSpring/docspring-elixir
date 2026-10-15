@@ -8,11 +8,13 @@ defmodule Docspring.Model.MoveTemplateData do
 
   @derive JSON.Encoder
   defstruct [
-    :parent_folder_id
+    :parent_folder_id,
+    :version
   ]
 
   @type t :: %__MODULE__{
-    :parent_folder_id => String.t
+    :parent_folder_id => String.t | nil,
+    :version => String.t | nil
   }
 
   def decode(value) do

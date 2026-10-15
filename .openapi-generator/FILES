@@ -25,6 +25,7 @@ lib/docspring/model/create_submission_data_request_event_response.ex
 lib/docspring/model/create_submission_data_request_response.ex
 lib/docspring/model/create_submission_data_request_token_response.ex
 lib/docspring/model/create_submission_response.ex
+lib/docspring/model/create_webhook_data.ex
 lib/docspring/model/custom_file.ex
 lib/docspring/model/error_or_multiple_errors_response.ex
 lib/docspring/model/error_response.ex
@@ -53,12 +54,15 @@ lib/docspring/model/success_multiple_errors_response.ex
 lib/docspring/model/template.ex
 lib/docspring/model/template_add_fields_response.ex
 lib/docspring/model/template_delete_response.ex
+lib/docspring/model/template_model_code_response.ex
 lib/docspring/model/template_preview.ex
 lib/docspring/model/template_publish_version_response.ex
 lib/docspring/model/update_html_template.ex
 lib/docspring/model/update_pdf_template.ex
 lib/docspring/model/update_submission_data_request_data.ex
+lib/docspring/model/update_webhook_data.ex
 lib/docspring/model/upload_presign_response.ex
+lib/docspring/model/webhook.ex
 lib/docspring/request_builder.ex
 mix.exs
 test/test_helper.exs

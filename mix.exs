@@ -4,13 +4,13 @@ defmodule Docspring.Mixfile do
   def project do
     [
       app: :docspring,
-      version: "3.0.0",
+      version: "3.1.0",
       elixir: "~> 1.18",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
       description: """
-      Use DocSpring&#39;s API to programmatically fill out PDF forms, convert HTML to PDFs, merge PDFs, or request legally binding e-signatures.
+      Use DocSpring's API to programmatically fill out PDF forms, convert HTML to PDFs, merge PDFs, or request legally binding e-signatures.
       """,
       deps: deps()
     ]
@@ -47,6 +47,7 @@ defmodule Docspring.Mixfile do
         name: "docspring",
         files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
         licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/DocSpring/docspring-elixir"}      ]
+        links: %{"GitHub" => "https://github.com/DocSpring/docspring-elixir"}
+      ]
   end
 end

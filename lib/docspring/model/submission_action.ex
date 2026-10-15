@@ -13,7 +13,8 @@ defmodule Docspring.Model.SubmissionAction do
     :state,
     :action_type,
     :action_category,
-    :result_data
+    :result_data,
+    :error_message
   ]
 
   @type t :: %__MODULE__{
@@ -22,7 +23,8 @@ defmodule Docspring.Model.SubmissionAction do
     :state => String.t,
     :action_type => String.t,
     :action_category => String.t,
-    :result_data => map()
+    :result_data => map(),
+    :error_message => String.t | nil
   }
 
   def decode(value) do
