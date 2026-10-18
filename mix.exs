@@ -4,7 +4,7 @@ defmodule Docspring.Mixfile do
   def project do
     [
       app: :docspring,
-      version: "3.1.0",
+      version: "3.2.0",
       elixir: "~> 1.18",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -45,7 +45,7 @@ defmodule Docspring.Mixfile do
    defp package do
       [
         name: "docspring",
-        files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
+        files: ~w(.formatter.exs config lib mix.exs README* AGENTS.md LICENSE*),
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/DocSpring/docspring-elixir"}
       ]
