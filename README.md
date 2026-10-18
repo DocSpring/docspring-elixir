@@ -6,7 +6,7 @@ templates with your data, generates PDFs from HTML templates, combines PDFs and 
 [Documentation](https://docspring.com/docs/) · [API reference](https://docspring.com/docs/api/) ·
 [Hex](https://hex.pm/packages/docspring) · [Changelog](https://github.com/DocSpring/docspring-elixir/blob/main/CHANGELOG.md)
 
-Version 3.2.0. Requires Elixir ~> 1.18.
+Version 3.3.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -15,7 +15,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 3.2.0"}
+    {:docspring, "~> 3.3.0"}
   ]
 end
 ```

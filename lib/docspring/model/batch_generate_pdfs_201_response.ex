@@ -12,7 +12,8 @@ defmodule Docspring.Model.BatchGeneratePdfs201Response do
     :error,
     :errors,
     :submission_batch,
-    :submissions
+    :submissions,
+    :code
   ]
 
   @type t :: %__MODULE__{
@@ -20,7 +21,8 @@ defmodule Docspring.Model.BatchGeneratePdfs201Response do
     :error => String.t | nil,
     :errors => [String.t] | nil,
     :submission_batch => Docspring.Model.SubmissionBatch.t,
-    :submissions => [map()]
+    :submissions => [map()],
+    :code => String.t | nil
   }
 
   alias Docspring.Deserializer

@@ -10,13 +10,17 @@ defmodule Docspring.Model.CreateCombinedSubmissionResponse do
   defstruct [
     :status,
     :combined_submission,
-    :errors
+    :error,
+    :errors,
+    :code
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
     :combined_submission => Docspring.Model.CombinedSubmission.t,
-    :errors => [String.t] | nil
+    :error => String.t | nil,
+    :errors => [String.t] | nil,
+    :code => String.t | nil
   }
 
   alias Docspring.Deserializer

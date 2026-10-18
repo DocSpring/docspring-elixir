@@ -10,12 +10,14 @@ defmodule Docspring.Model.CreateSubmissionDataRequestTokenResponse do
   defstruct [
     :status,
     :token,
+    :error,
     :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
     :token => Docspring.Model.SubmissionDataRequestToken.t,
+    :error => String.t | nil,
     :errors => [String.t] | nil
   }
 

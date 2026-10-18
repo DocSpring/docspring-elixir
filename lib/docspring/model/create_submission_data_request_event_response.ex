@@ -10,12 +10,14 @@ defmodule Docspring.Model.CreateSubmissionDataRequestEventResponse do
   defstruct [
     :status,
     :event,
+    :error,
     :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
     :event => Docspring.Model.SubmissionDataRequestEvent.t,
+    :error => String.t | nil,
     :errors => [String.t] | nil
   }
 

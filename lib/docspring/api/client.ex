@@ -44,7 +44,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Generate multiple PDFs
-  Generates up to 50 PDFs in a single request. Each submission can use a different template and data. Supports both synchronous (wait for all PDFs) and asynchronous processing. More efficient than individual requests when creating multiple PDFs.  See also: - [Batch Generate PDFs](https://docspring.com/docs/api-guide/generate-pdfs/batch-generate-pdfs/) - Request format, responses, and limits 
+  Generates up to 50 PDFs in a single request. Each submission can use a different template and data. Supports both synchronous (wait for all PDFs) and asynchronous processing. More efficient than individual requests when creating multiple PDFs.  Live PDFs use credits. If any live submission is waiting for credits, the API returns 402 and the others are still processed: check each submission's `state`. See [Credits & Rate Limits](https://docspring.com/docs/api-guide/credits-and-rate-limits/).  See also: - [Batch Generate PDFs](https://docspring.com/docs/api-guide/generate-pdfs/batch-generate-pdfs/) - Request format, responses, and limits 
 
   ### Parameters
 
@@ -58,7 +58,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.BatchGeneratePdfs201Response.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec batch_generate_pdfs(Tesla.Env.client, Docspring.Model.SubmissionBatchData.t, keyword()) :: {:ok, Docspring.Model.ErrorOrMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.BatchGeneratePdfs201Response.t} | {:error, Tesla.Env.t}
+  @spec batch_generate_pdfs(Tesla.Env.client, Docspring.Model.SubmissionBatchData.t, keyword()) :: {:ok, Docspring.Model.ErrorOrMultipleErrorsResponse.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.ForbiddenErrorResponse.t} | {:ok, Docspring.Model.BatchGeneratePdfs201Response.t} | {:error, Tesla.Env.t}
   def batch_generate_pdfs(connection, data, opts \\ []) do
     optional_params = %{
       :wait => :query
@@ -75,6 +75,8 @@ defmodule Docspring.Api.Client do
     connection
     |> Connection.request(request)
     |> evaluate_response([
+      {402, Docspring.Model.BatchGeneratePdfs201Response},
+      {403, Docspring.Model.ForbiddenErrorResponse},
       {201, Docspring.Model.BatchGeneratePdfs201Response},
       {200, Docspring.Model.BatchGeneratePdfs201Response},
       {401, Docspring.Model.ErrorResponse},
@@ -85,7 +87,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Merge submission PDFs, template PDFs, or custom files
-  Combines multiple PDFs from various sources into a single PDF file. Supports merging submission PDFs, template PDFs, custom files, other merged PDFs, and PDFs from URLs. Merges the PDFs in the order provided. 
+  Combines multiple PDFs from various sources into a single PDF file. Supports merging submission PDFs, template PDFs, custom files, other merged PDFs, and PDFs from URLs. Merges the PDFs in the order provided.  Combining uses credits (4 per source PDF, plus 4 per unit of the combined PDF), even with a test API token or watermarked source PDFs. If your balance can't cover it, the API returns 402 and the combined submission waits in the `insufficient_credits` state until you add credits. See [Credits & Rate Limits](https://docspring.com/docs/api-guide/credits-and-rate-limits/). 
 
   ### Parameters
 
@@ -110,9 +112,10 @@ defmodule Docspring.Api.Client do
     connection
     |> Connection.request(request)
     |> evaluate_response([
+      {402, Docspring.Model.CreateCombinedSubmissionResponse},
+      {403, Docspring.Model.ErrorResponse},
       {201, Docspring.Model.CreateCombinedSubmissionResponse},
       {422, Docspring.Model.MultipleErrorsResponse},
-      {403, Docspring.Model.ErrorResponse},
       {400, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -134,7 +137,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec copy_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
+  @spec copy_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ForbiddenErrorResponse.t} | {:error, Tesla.Env.t}
   def copy_template(connection, template_id, opts \\ []) do
     optional_params = %{
       :body => :body
@@ -152,6 +155,7 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.TemplatePreview},
+      {403, Docspring.Model.ForbiddenErrorResponse},
       {404, Docspring.Model.ErrorResponse}
     ])
   end
@@ -310,7 +314,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_html_template(Tesla.Env.client, Docspring.Model.CreateHtmlTemplate.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
+  @spec create_html_template(Tesla.Env.client, Docspring.Model.CreateHtmlTemplate.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ForbiddenErrorResponse.t} | {:error, Tesla.Env.t}
   def create_html_template(connection, data, _opts \\ []) do
     request =
       %{}
@@ -323,6 +327,7 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.TemplatePreview},
+      {403, Docspring.Model.ForbiddenErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end
@@ -346,7 +351,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_pdf_template(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
+  @spec create_pdf_template(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ForbiddenErrorResponse.t} | {:error, Tesla.Env.t}
   def create_pdf_template(connection, template_left_square_bracketdocument_right_square_bracket, template_left_square_bracketname_right_square_bracket, opts \\ []) do
     optional_params = %{
       :wait => :query,
@@ -367,6 +372,7 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.TemplatePreview},
+      {403, Docspring.Model.ForbiddenErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end
@@ -386,7 +392,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.TemplatePreview.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec create_pdf_template_from_upload(Tesla.Env.client, Docspring.Model.CreatePdfTemplate.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:error, Tesla.Env.t}
+  @spec create_pdf_template_from_upload(Tesla.Env.client, Docspring.Model.CreatePdfTemplate.t, keyword()) :: {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ForbiddenErrorResponse.t} | {:error, Tesla.Env.t}
   def create_pdf_template_from_upload(connection, data, _opts \\ []) do
     request =
       %{}
@@ -399,7 +405,8 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.TemplatePreview},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {403, Docspring.Model.ForbiddenErrorResponse}
     ])
   end
 
@@ -607,7 +614,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Generate a PDF
-  Creates a PDF submission by filling in a template with data. Supports both synchronous (default) and asynchronous processing. Add the `wait=false` query parameter to return immediately.  See also: - [Customize the PDF Title and Filename](https://docspring.com/docs/api-guide/generate-pdfs/customize-pdf-title-and-filename/) - Set custom metadata - [Handling Truncated Text](https://docspring.com/docs/api-guide/generate-pdfs/handle-truncated-text/) - Handle text that doesn't fit in fields 
+  Creates a PDF submission by filling in a template with data. Supports both synchronous (default) and asynchronous processing. Add the `wait=false` query parameter to return immediately.  Live PDFs use credits; test PDFs (`test: true`) are free and watermarked. If your balance can't cover a live PDF, the API returns 402 and the submission waits in the `insufficient_credits` state until you add credits. See [Credits & Rate Limits](https://docspring.com/docs/api-guide/credits-and-rate-limits/).  See also: - [Customize the PDF Title and Filename](https://docspring.com/docs/api-guide/generate-pdfs/customize-pdf-title-and-filename/) - Set custom metadata - [Handling Truncated Text](https://docspring.com/docs/api-guide/generate-pdfs/handle-truncated-text/) - Handle text that doesn't fit in fields 
 
   ### Parameters
 
@@ -622,7 +629,7 @@ defmodule Docspring.Api.Client do
   - `{:ok, Docspring.Model.CreateSubmissionResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec generate_pdf(Tesla.Env.client, String.t, Docspring.Model.CreatePdfSubmissionData.t, keyword()) :: {:ok, Docspring.Model.Submission422Response.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.CreateSubmissionResponse.t} | {:error, Tesla.Env.t}
+  @spec generate_pdf(Tesla.Env.client, String.t, Docspring.Model.CreatePdfSubmissionData.t, keyword()) :: {:ok, Docspring.Model.Submission422Response.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:ok, Docspring.Model.ForbiddenErrorResponse.t} | {:ok, Docspring.Model.CreateSubmissionResponse.t} | {:error, Tesla.Env.t}
   def generate_pdf(connection, template_id, submission, opts \\ []) do
     optional_params = %{
       :wait => :query
@@ -639,8 +646,10 @@ defmodule Docspring.Api.Client do
     connection
     |> Connection.request(request)
     |> evaluate_response([
+      {402, Docspring.Model.CreateSubmissionResponse},
       {201, Docspring.Model.CreateSubmissionResponse},
       {422, Docspring.Model.Submission422Response},
+      {403, Docspring.Model.ForbiddenErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end
@@ -680,7 +689,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Check the status of a combined submission (merged PDFs)
-  Retrieves the details and status of a combined submission. Returns processing state, download URL (if processed), metadata, and information about any integrated actions (e.g., S3 uploads). 
+  Retrieves the details and status of a combined submission. Returns processing state, download URL (if processed), metadata, and information about any integrated actions (e.g., S3 uploads).  `insufficient_credits` means the combined submission is waiting for credits and is processed once you add them. If it's still waiting after 30 days, it moves to `error`. 
 
   ### Parameters
 
@@ -806,7 +815,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Check the status of a PDF
-  Retrieves the details and status of a PDF submission. Returns processing state, download URL (if processed), metadata, submission data (optional), and information about any integrated actions. Use this to poll for completion when using asynchronous processing. 
+  Retrieves the details and status of a PDF submission. Returns processing state, download URL (if processed), metadata, submission data (optional), and information about any integrated actions. Use this to poll for completion when using asynchronous processing.  `insufficient_credits` means the submission is waiting for credits and is processed once you add them. If it's still waiting after 30 days, it moves to `error`. 
 
   ### Parameters
 
@@ -844,7 +853,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Check the status of a submission batch job
-  Retrieves the status and results of a batch PDF generation job. Returns processing state, completion statistics, and optionally includes all individual submission details. Use this to poll for completion when using asynchronous batch processing. 
+  Retrieves the status and results of a batch PDF generation job. Returns processing state, completion statistics, and optionally includes all individual submission details. Use this to poll for completion when using asynchronous batch processing.  Submissions waiting for credits are in the `insufficient_credits` state and count as pending, so the batch stays `pending` until you add credits or they stop waiting after 30 days. 
 
   ### Parameters
 

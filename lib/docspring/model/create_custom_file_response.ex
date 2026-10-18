@@ -10,12 +10,14 @@ defmodule Docspring.Model.CreateCustomFileResponse do
   defstruct [
     :status,
     :custom_file,
+    :error,
     :errors
   ]
 
   @type t :: %__MODULE__{
     :status => String.t,
     :custom_file => Docspring.Model.CustomFile.t,
+    :error => String.t | nil,
     :errors => [String.t] | nil
   }
 

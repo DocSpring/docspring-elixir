@@ -1,3 +1,14 @@
+### 3.3.0 [October 18, 2026]
+
+- Submissions and combined submissions can be in the new `insufficient_credits` state: a live PDF that your credit
+  balance can't cover is saved and processed once you add credits. See
+  https://docspring.com/docs/api-guide/credits-and-rate-limits/.
+- generate_pdf, batch_generate_pdfs and combine_pdfs document the 402 response for insufficient credits. Their
+  responses can include a `code`, which is `insufficient_credits` on a 402.
+- generate_pdf, batch_generate_pdfs, create_pdf_template, create_pdf_template_from_upload, create_html_template and
+  copy_template document a 403 response with a `code` of `upgrade_required` (the plan doesn't include it) or
+  `account_suspended`.
+
 ### 3.2.0 [October 18, 2026]
 
 - Templates: new `parse_dates_using_template_date_format` setting, when you create or update a template. When it's

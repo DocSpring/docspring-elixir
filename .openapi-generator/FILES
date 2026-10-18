@@ -30,6 +30,7 @@ lib/docspring/model/custom_file.ex
 lib/docspring/model/error_or_multiple_errors_response.ex
 lib/docspring/model/error_response.ex
 lib/docspring/model/folder.ex
+lib/docspring/model/forbidden_error_response.ex
 lib/docspring/model/json_schema.ex
 lib/docspring/model/list_submissions_response.ex
 lib/docspring/model/move_folder_data.ex
