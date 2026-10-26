@@ -7,12 +7,10 @@
 # General application configuration
 import Config
 
-config :docspring, base_url: "https://sync.api.docspring.com/api/v1"
+config :docspring, base_url: "https://sync.api.docspring.com/api/v2"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 #
 # import_config "#{config_env()}.exs"
-
-config :tesla, Docspring.Connection, json: Jason
 config :tesla, disable_deprecated_builder_warning: true

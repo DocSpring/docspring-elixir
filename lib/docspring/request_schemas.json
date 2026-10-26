@@ -1,0 +1,3187 @@
+{
+  "operations": {
+    "copyTemplate": {
+      "body": {
+        "mediaType": "application/json",
+        "required": false,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "parent_folder_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+(\\.\\d+)?)?$",
+              "x-pattern-message": "must be a published version like 1.2.3 or 1"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "createCombinedPdf": {
+      "query": {
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source_pdfs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/SubmissionSourcePdf"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CombinedPdfSourcePdf"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TemplateSourcePdf"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CustomFileSourcePdf"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UrlSourcePdf"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": [
+                    [
+                      "submission",
+                      "#/components/schemas/SubmissionSourcePdf"
+                    ],
+                    [
+                      "combined_pdf",
+                      "#/components/schemas/CombinedPdfSourcePdf"
+                    ],
+                    [
+                      "template",
+                      "#/components/schemas/TemplateSourcePdf"
+                    ],
+                    [
+                      "custom_file",
+                      "#/components/schemas/CustomFileSourcePdf"
+                    ],
+                    [
+                      "url",
+                      "#/components/schemas/UrlSourcePdf"
+                    ]
+                  ]
+                }
+              }
+            },
+            "metadata": {
+              "type": "object"
+            },
+            "password": {
+              "type": "string",
+              "minLength": 1
+            },
+            "delete_custom_files": {
+              "type": "boolean"
+            },
+            "expires_in": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 315360000
+            }
+          },
+          "required": [
+            "source_pdfs"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "createCustomFileFromUpload": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "cache_id"
+          ],
+          "properties": {
+            "cache_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "createFolder": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[^/]*$",
+              "x-pattern-message": "can't contain a slash (/)"
+            },
+            "parent_folder_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "createSignatureRequestEvent": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "type": "string",
+              "enum": [
+                "send_request"
+              ]
+            },
+            "message_type": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "email",
+                "sms",
+                "fax",
+                "mail",
+                "slack",
+                "msteams",
+                "discord",
+                "telegram",
+                "whatsapp",
+                null
+              ]
+            },
+            "message_recipient": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 255
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "event_type"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "createSignatureRequestToken": {
+      "body": {
+        "mediaType": "application/json",
+        "required": false,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "api",
+                "email"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "createSubmission": {
+      "query": {
+        "version": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+            "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+          }
+        },
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "test": {
+              "type": "boolean"
+            },
+            "editable": {
+              "type": "boolean"
+            },
+            "data": {
+              "type": "object"
+            },
+            "metadata": {
+              "type": "object"
+            },
+            "password": {
+              "type": "string",
+              "minLength": 1
+            },
+            "expires_in": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 315360000
+            },
+            "field_overrides": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/components/schemas/FieldOverride"
+              }
+            },
+            "html": {
+              "type": "string"
+            },
+            "css": {
+              "type": "string"
+            },
+            "signature_requests": {
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 255
+                  },
+                  "email": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 255
+                  },
+                  "fields": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "metadata": {
+                    "type": "object"
+                  },
+                  "role": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "auth_type": {
+                    "type": "string",
+                    "enum": [
+                      "password",
+                      "oauth",
+                      "email_link",
+                      "phone_number",
+                      "ldap",
+                      "saml"
+                    ]
+                  },
+                  "auth_second_factor_type": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "phone_number",
+                      "totp",
+                      "mobile_push",
+                      "security_key",
+                      "fingerprint"
+                    ]
+                  },
+                  "auth_provider": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 255
+                  },
+                  "auth_session_started_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "auth_session_id_hash": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "auth_user_id_hash": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "auth_username_hash": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "auth_phone_number_hash": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "ignore_unknown_fields": {
+                    "type": "boolean"
+                  },
+                  "prefilled_values_editable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "fields",
+                  "auth_type"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "createSubmissionBatch": {
+      "query": {
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "metadata": {
+              "type": "object"
+            },
+            "template_id": {
+              "type": "string"
+            },
+            "template_version": {
+              "type": "string",
+              "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+              "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+            },
+            "test": {
+              "type": "boolean"
+            },
+            "submissions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 50,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "test": {
+                    "type": "boolean"
+                  },
+                  "editable": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object"
+                  },
+                  "metadata": {
+                    "type": "object"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "expires_in": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 315360000
+                  },
+                  "field_overrides": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/FieldOverride"
+                    }
+                  },
+                  "html": {
+                    "type": "string"
+                  },
+                  "css": {
+                    "type": "string"
+                  },
+                  "template_id": {
+                    "type": "string"
+                  },
+                  "template_version": {
+                    "type": "string",
+                    "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+                    "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "submissions"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "createTemplate": {
+      "query": {
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "template_type": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "html"
+              ]
+            },
+            "parent_folder_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            },
+            "locked": {
+              "type": "boolean"
+            },
+            "add_signature_request_submission_id_footers": {
+              "type": "boolean"
+            },
+            "ai_field_naming_language": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "english",
+                "form_language"
+              ]
+            },
+            "allow_additional_properties": {
+              "type": "boolean"
+            },
+            "allow_skipping_optional_fields": {
+              "type": "boolean"
+            },
+            "default_form_mode": {
+              "type": "string",
+              "enum": [
+                "web",
+                "visual",
+                "dual"
+              ]
+            },
+            "editable_submissions": {
+              "type": "boolean"
+            },
+            "embed_domains": {
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              }
+            },
+            "embed_edit_allow_settings": {
+              "type": "boolean"
+            },
+            "embed_edit_allow_versioning": {
+              "type": "boolean"
+            },
+            "embed_edit_allow_document_replacement": {
+              "type": "boolean"
+            },
+            "encrypt_pdfs": {
+              "type": "boolean"
+            },
+            "encrypt_pdfs_password": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "expire_submissions": {
+              "type": "boolean"
+            },
+            "expire_after": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5256000
+            },
+            "expiration_interval": {
+              "type": "string",
+              "enum": [
+                "minutes",
+                "hours",
+                "days"
+              ]
+            },
+            "merge_audit_trail_pdf": {
+              "type": "boolean"
+            },
+            "parse_dates_using_template_date_format": {
+              "type": "boolean"
+            },
+            "public_submissions": {
+              "type": "boolean"
+            },
+            "public_web_form": {
+              "type": "boolean"
+            },
+            "redirect_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri"
+            },
+            "slack_webhook_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri"
+            },
+            "defaults": {
+              "type": "object",
+              "properties": {
+                "typeface": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "Inconsolata",
+                    "Roboto Mono",
+                    "Ubuntu Mono",
+                    "Menlo",
+                    "Courier",
+                    "Helvetica",
+                    "Arial",
+                    "Calibri",
+                    "Open Sans",
+                    "Roboto",
+                    "Lato",
+                    "Poppins",
+                    "Public Sans",
+                    "Questrial",
+                    "Times New Roman",
+                    "Dancing Script",
+                    "Lovtony Script",
+                    null
+                  ]
+                },
+                "font_size": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "character_spacing": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 50
+                },
+                "color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "background_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "bold": {
+                  "type": "boolean"
+                },
+                "uppercase": {
+                  "type": "boolean"
+                },
+                "alignment": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "center",
+                    "right",
+                    "justify"
+                  ]
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "date_format": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "date_time_format": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "check_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "check_character": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "&#10003;",
+                    "&#10004;",
+                    "&#10006;",
+                    "&#10007;",
+                    "&#10008;",
+                    null
+                  ]
+                },
+                "check_background_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "required_field_background_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "true_text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "false_text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "shape_fill_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "shape_border_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "shape_border_width": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "field_dependencies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "require_and_show",
+                      "show",
+                      "require"
+                    ]
+                  },
+                  "match": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "any"
+                    ]
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/FieldPresenceCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldEqualsCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldInCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldComparisonCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldRangeCondition"
+                        }
+                      ],
+                      "discriminator": {
+                        "propertyName": "operator",
+                        "mapping": [
+                          [
+                            "present",
+                            "#/components/schemas/FieldPresenceCondition"
+                          ],
+                          [
+                            "blank",
+                            "#/components/schemas/FieldPresenceCondition"
+                          ],
+                          [
+                            "equals",
+                            "#/components/schemas/FieldEqualsCondition"
+                          ],
+                          [
+                            "not_equals",
+                            "#/components/schemas/FieldEqualsCondition"
+                          ],
+                          [
+                            "in",
+                            "#/components/schemas/FieldInCondition"
+                          ],
+                          [
+                            "gt",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "gte",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "lt",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "lte",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "range",
+                            "#/components/schemas/FieldRangeCondition"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "targets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "group": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "action",
+                  "conditions",
+                  "targets"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "scss": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "header_html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "footer_html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "html_engine_options": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "Letter",
+                    "Legal",
+                    "Tabloid",
+                    "Ledger",
+                    "CR80",
+                    "A0",
+                    "A1",
+                    "A2",
+                    "A3",
+                    "A4",
+                    "A5",
+                    "A6",
+                    "Custom"
+                  ]
+                },
+                "width": {
+                  "type": "string"
+                },
+                "height": {
+                  "type": "string"
+                },
+                "scale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "landscape": {
+                  "type": "boolean"
+                },
+                "print_background": {
+                  "type": "boolean"
+                },
+                "margin_top": {
+                  "type": "string"
+                },
+                "margin_bottom": {
+                  "type": "string"
+                },
+                "margin_left": {
+                  "type": "string"
+                },
+                "margin_right": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "cache_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "detect_fields": {
+              "type": "boolean"
+            },
+            "field_source": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "pdf_detection",
+                "pdf_form_fields"
+              ]
+            },
+            "field_naming": {
+              "type": "string",
+              "enum": [
+                "ai",
+                "preserve"
+              ]
+            },
+            "field_logic": {
+              "type": "string",
+              "enum": [
+                "ai",
+                "none"
+              ]
+            }
+          },
+          "required": [
+            "template_type"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "createWebhook": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 255
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "event_types": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "submission.processed",
+                  "submission.failed",
+                  "submission.declined",
+                  "signature_request.viewed",
+                  "signature_request.completed",
+                  "signature_request.declined",
+                  "combined_pdf.processed",
+                  "combined_pdf.failed",
+                  "submission_batch.processed",
+                  "submission_batch.failed",
+                  "submission.created",
+                  "submission.updated",
+                  "submission.expired",
+                  "signature_request.updated",
+                  "combined_pdf.expired",
+                  "template.created",
+                  "template.updated",
+                  "template.deleted",
+                  "webhook.created",
+                  "webhook.updated",
+                  "webhook.deleted",
+                  "custom_file.created",
+                  "folder.created",
+                  "folder.updated",
+                  "folder.deleted"
+                ]
+              }
+            },
+            "mode": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "test",
+                "live",
+                null
+              ]
+            },
+            "api_token_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "template_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "folder_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "include_submission_data": {
+              "type": "boolean"
+            },
+            "strip_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "url",
+            "event_types"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "deleteCustomFile": {},
+    "deleteFolder": {},
+    "deleteTemplate": {
+      "query": {
+        "version": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "pattern": "^(\\d+\\.\\d+\\.\\d+|draft)$",
+            "x-pattern-message": "must be a full version like 1.2.3, or draft"
+          }
+        }
+      }
+    },
+    "deleteWebhook": {},
+    "expireCombinedPdf": {},
+    "expireSubmission": {},
+    "generateSubmissionPreview": {},
+    "getCombinedPdf": {},
+    "getCustomFile": {},
+    "getFolder": {},
+    "getPresignUrl": {},
+    "getSignatureRequest": {},
+    "getSubmission": {},
+    "getSubmissionBatch": {
+      "query": {
+        "include_data": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "getTemplate": {
+      "query": {
+        "version": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+            "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+          }
+        }
+      }
+    },
+    "getTemplateModelCode": {
+      "query": {
+        "version": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+            "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+          }
+        },
+        "lang": {
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "typescript",
+              "javascript",
+              "ruby",
+              "python",
+              "php",
+              "java",
+              "csharp",
+              "elixir",
+              "go"
+            ]
+          }
+        }
+      }
+    },
+    "getTemplateSchema": {
+      "query": {
+        "version": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+            "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+          }
+        }
+      }
+    },
+    "getWebhook": {},
+    "listCombinedPdfs": {
+      "query": {
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "listCustomFiles": {
+      "query": {
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "listFolders": {
+      "query": {
+        "parent_folder_id": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "listSubmissions": {
+      "query": {
+        "template_id": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "test": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        "created_after": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "created_before": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "include_data": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "listTemplateSubmissions": {
+      "query": {
+        "test": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        "created_after": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "created_before": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "include_data": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "listTemplates": {
+      "query": {
+        "query": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "parent_folder_id": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "listWebhooks": {
+      "query": {
+        "event_type": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "submission.processed",
+              "submission.failed",
+              "submission.declined",
+              "signature_request.viewed",
+              "signature_request.completed",
+              "signature_request.declined",
+              "combined_pdf.processed",
+              "combined_pdf.failed",
+              "submission_batch.processed",
+              "submission_batch.failed",
+              "submission.created",
+              "submission.updated",
+              "submission.expired",
+              "signature_request.updated",
+              "combined_pdf.expired",
+              "template.created",
+              "template.updated",
+              "template.deleted",
+              "webhook.created",
+              "webhook.updated",
+              "webhook.deleted",
+              "custom_file.created",
+              "folder.created",
+              "folder.updated",
+              "folder.deleted"
+            ]
+          }
+        },
+        "mode": {
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "test",
+              "live"
+            ]
+          }
+        },
+        "template_id": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "folder_id": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "api_token_id": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "limit": {
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "cursor": {
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "moveFolder": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "parent_folder_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            }
+          },
+          "required": [
+            "parent_folder_id"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "moveTemplate": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "parent_folder_id"
+          ],
+          "properties": {
+            "parent_folder_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "publishTemplateVersion": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "version_type"
+          ],
+          "properties": {
+            "version_type": {
+              "type": "string",
+              "enum": [
+                "major",
+                "minor",
+                "patch"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "renameFolder": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[^/]*$",
+              "x-pattern-message": "can't contain a slash (/)"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "restoreTemplateVersion": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "version"
+          ],
+          "properties": {
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+(\\.\\d+(\\.\\d+)?)?$",
+              "x-pattern-message": "must be a published version like 1.2.3 or 1"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "testAuthentication": {},
+    "updateSignatureRequest": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "metadata": {
+              "type": "object"
+            },
+            "auth_type": {
+              "type": "string",
+              "enum": [
+                "password",
+                "oauth",
+                "email_link",
+                "phone_number",
+                "ldap",
+                "saml"
+              ]
+            },
+            "auth_second_factor_type": {
+              "type": "string",
+              "enum": [
+                "none",
+                "phone_number",
+                "totp",
+                "mobile_push",
+                "security_key",
+                "fingerprint"
+              ]
+            },
+            "auth_provider": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 255
+            },
+            "auth_session_started_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "auth_session_id_hash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "auth_user_id_hash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "auth_username_hash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "auth_phone_number_hash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "updateTemplate": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "parent_folder_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            },
+            "locked": {
+              "type": "boolean"
+            },
+            "add_signature_request_submission_id_footers": {
+              "type": "boolean"
+            },
+            "ai_field_naming_language": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "english",
+                "form_language"
+              ]
+            },
+            "allow_additional_properties": {
+              "type": "boolean"
+            },
+            "allow_skipping_optional_fields": {
+              "type": "boolean"
+            },
+            "default_form_mode": {
+              "type": "string",
+              "enum": [
+                "web",
+                "visual",
+                "dual"
+              ]
+            },
+            "editable_submissions": {
+              "type": "boolean"
+            },
+            "embed_domains": {
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              }
+            },
+            "embed_edit_allow_settings": {
+              "type": "boolean"
+            },
+            "embed_edit_allow_versioning": {
+              "type": "boolean"
+            },
+            "embed_edit_allow_document_replacement": {
+              "type": "boolean"
+            },
+            "encrypt_pdfs": {
+              "type": "boolean"
+            },
+            "encrypt_pdfs_password": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "expire_submissions": {
+              "type": "boolean"
+            },
+            "expire_after": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5256000
+            },
+            "expiration_interval": {
+              "type": "string",
+              "enum": [
+                "minutes",
+                "hours",
+                "days"
+              ]
+            },
+            "merge_audit_trail_pdf": {
+              "type": "boolean"
+            },
+            "parse_dates_using_template_date_format": {
+              "type": "boolean"
+            },
+            "public_submissions": {
+              "type": "boolean"
+            },
+            "public_web_form": {
+              "type": "boolean"
+            },
+            "redirect_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri"
+            },
+            "slack_webhook_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uri"
+            },
+            "defaults": {
+              "type": "object",
+              "properties": {
+                "typeface": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "Inconsolata",
+                    "Roboto Mono",
+                    "Ubuntu Mono",
+                    "Menlo",
+                    "Courier",
+                    "Helvetica",
+                    "Arial",
+                    "Calibri",
+                    "Open Sans",
+                    "Roboto",
+                    "Lato",
+                    "Poppins",
+                    "Public Sans",
+                    "Questrial",
+                    "Times New Roman",
+                    "Dancing Script",
+                    "Lovtony Script",
+                    null
+                  ]
+                },
+                "font_size": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "character_spacing": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 50
+                },
+                "color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "background_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "bold": {
+                  "type": "boolean"
+                },
+                "uppercase": {
+                  "type": "boolean"
+                },
+                "alignment": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "center",
+                    "right",
+                    "justify"
+                  ]
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "date_format": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "date_time_format": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "check_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "check_character": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "&#10003;",
+                    "&#10004;",
+                    "&#10006;",
+                    "&#10007;",
+                    "&#10008;",
+                    null
+                  ]
+                },
+                "check_background_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "required_field_background_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "true_text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "false_text": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "shape_fill_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "shape_border_color": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "pattern": "^[A-Fa-f0-9]{6}$",
+                  "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+                },
+                "shape_border_width": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "field_dependencies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "require_and_show",
+                      "show",
+                      "require"
+                    ]
+                  },
+                  "match": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "any"
+                    ]
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/FieldPresenceCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldEqualsCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldInCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldComparisonCondition"
+                        },
+                        {
+                          "$ref": "#/components/schemas/FieldRangeCondition"
+                        }
+                      ],
+                      "discriminator": {
+                        "propertyName": "operator",
+                        "mapping": [
+                          [
+                            "present",
+                            "#/components/schemas/FieldPresenceCondition"
+                          ],
+                          [
+                            "blank",
+                            "#/components/schemas/FieldPresenceCondition"
+                          ],
+                          [
+                            "equals",
+                            "#/components/schemas/FieldEqualsCondition"
+                          ],
+                          [
+                            "not_equals",
+                            "#/components/schemas/FieldEqualsCondition"
+                          ],
+                          [
+                            "in",
+                            "#/components/schemas/FieldInCondition"
+                          ],
+                          [
+                            "gt",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "gte",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "lt",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "lte",
+                            "#/components/schemas/FieldComparisonCondition"
+                          ],
+                          [
+                            "range",
+                            "#/components/schemas/FieldRangeCondition"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "targets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "group": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "action",
+                  "conditions",
+                  "targets"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "scss": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "header_html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "footer_html": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "html_engine_options": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "Letter",
+                    "Legal",
+                    "Tabloid",
+                    "Ledger",
+                    "CR80",
+                    "A0",
+                    "A1",
+                    "A2",
+                    "A3",
+                    "A4",
+                    "A5",
+                    "A6",
+                    "Custom"
+                  ]
+                },
+                "width": {
+                  "type": "string"
+                },
+                "height": {
+                  "type": "string"
+                },
+                "scale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "landscape": {
+                  "type": "boolean"
+                },
+                "print_background": {
+                  "type": "boolean"
+                },
+                "margin_top": {
+                  "type": "string"
+                },
+                "margin_bottom": {
+                  "type": "string"
+                },
+                "margin_left": {
+                  "type": "string"
+                },
+                "margin_right": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "updateTemplateDocument": {
+      "query": {
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "cache_id"
+          ],
+          "properties": {
+            "cache_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "reimport_fields": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "updateWebhook": {
+      "body": {
+        "mediaType": "application/json",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 255
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "event_types": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "submission.processed",
+                  "submission.failed",
+                  "submission.declined",
+                  "signature_request.viewed",
+                  "signature_request.completed",
+                  "signature_request.declined",
+                  "combined_pdf.processed",
+                  "combined_pdf.failed",
+                  "submission_batch.processed",
+                  "submission_batch.failed",
+                  "submission.created",
+                  "submission.updated",
+                  "submission.expired",
+                  "signature_request.updated",
+                  "combined_pdf.expired",
+                  "template.created",
+                  "template.updated",
+                  "template.deleted",
+                  "webhook.created",
+                  "webhook.updated",
+                  "webhook.deleted",
+                  "custom_file.created",
+                  "folder.created",
+                  "folder.updated",
+                  "folder.deleted"
+                ]
+              }
+            },
+            "mode": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "test",
+                "live",
+                null
+              ]
+            },
+            "api_token_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "template_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "folder_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "include_submission_data": {
+              "type": "boolean"
+            },
+            "strip_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "uploadTemplate": {
+      "query": {
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "multipart/form-data",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "document"
+          ],
+          "properties": {
+            "document": {
+              "type": "string",
+              "format": "binary"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "description": {
+              "type": "string"
+            },
+            "parent_folder_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ai_field_naming_language": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "english",
+                "form_language"
+              ]
+            },
+            "detect_fields": {
+              "type": "boolean"
+            },
+            "field_source": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "pdf_detection",
+                "pdf_form_fields"
+              ]
+            },
+            "field_naming": {
+              "type": "string",
+              "enum": [
+                "ai",
+                "preserve"
+              ]
+            },
+            "field_logic": {
+              "type": "string",
+              "enum": [
+                "ai",
+                "none"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "uploadTemplateDocument": {
+      "query": {
+        "wait": {
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      },
+      "body": {
+        "mediaType": "multipart/form-data",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": [
+            "document"
+          ],
+          "properties": {
+            "document": {
+              "type": "string",
+              "format": "binary"
+            },
+            "reimport_fields": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "routes": {
+    "DELETE /combined_pdfs/{combined_pdf_id}": "expireCombinedPdf",
+    "DELETE /custom_files/{custom_file_id}": "deleteCustomFile",
+    "DELETE /folders/{folder_id}": "deleteFolder",
+    "DELETE /submissions/{submission_id}": "expireSubmission",
+    "DELETE /templates/{template_id}": "deleteTemplate",
+    "DELETE /webhooks/{webhook_id}": "deleteWebhook",
+    "GET /authentication": "testAuthentication",
+    "GET /combined_pdfs": "listCombinedPdfs",
+    "GET /combined_pdfs/{combined_pdf_id}": "getCombinedPdf",
+    "GET /custom_files": "listCustomFiles",
+    "GET /custom_files/{custom_file_id}": "getCustomFile",
+    "GET /folders": "listFolders",
+    "GET /folders/{folder_id}": "getFolder",
+    "GET /signature_requests/{signature_request_id}": "getSignatureRequest",
+    "GET /submissions": "listSubmissions",
+    "GET /submissions/batches/{submission_batch_id}": "getSubmissionBatch",
+    "GET /submissions/{submission_id}": "getSubmission",
+    "GET /templates": "listTemplates",
+    "GET /templates/{template_id}": "getTemplate",
+    "GET /templates/{template_id}/model_code": "getTemplateModelCode",
+    "GET /templates/{template_id}/schema": "getTemplateSchema",
+    "GET /templates/{template_id}/submissions": "listTemplateSubmissions",
+    "GET /uploads/presign": "getPresignUrl",
+    "GET /webhooks": "listWebhooks",
+    "GET /webhooks/{webhook_id}": "getWebhook",
+    "POST /combined_pdfs": "createCombinedPdf",
+    "POST /custom_files": "createCustomFileFromUpload",
+    "POST /folders": "createFolder",
+    "POST /folders/{folder_id}/move": "moveFolder",
+    "POST /folders/{folder_id}/rename": "renameFolder",
+    "POST /signature_requests/{signature_request_id}/events": "createSignatureRequestEvent",
+    "POST /signature_requests/{signature_request_id}/tokens": "createSignatureRequestToken",
+    "POST /submissions/batches": "createSubmissionBatch",
+    "POST /submissions/{submission_id}/generate_preview": "generateSubmissionPreview",
+    "POST /templates": "createTemplate",
+    "POST /templates/upload": "uploadTemplate",
+    "POST /templates/{template_id}/copy": "copyTemplate",
+    "POST /templates/{template_id}/move": "moveTemplate",
+    "POST /templates/{template_id}/publish_version": "publishTemplateVersion",
+    "POST /templates/{template_id}/restore_version": "restoreTemplateVersion",
+    "POST /templates/{template_id}/submissions": "createSubmission",
+    "POST /webhooks": "createWebhook",
+    "PUT /signature_requests/{signature_request_id}": "updateSignatureRequest",
+    "PUT /templates/{template_id}": "updateTemplate",
+    "PUT /templates/{template_id}/document": "updateTemplateDocument",
+    "PUT /templates/{template_id}/document/upload": "uploadTemplateDocument",
+    "PUT /webhooks/{webhook_id}": "updateWebhook"
+  },
+  "components": {
+    "schemas": {
+      "CombinedPdfSourcePdf": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "combined_pdf"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "url": "isn't used by 'combined_pdf' source PDFs. Remove it",
+          "template_version": "isn't used by 'combined_pdf' source PDFs. Remove it",
+          "processed": "isn't used by 'combined_pdf' source PDFs. Remove it"
+        }
+      },
+      "CustomFileSourcePdf": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "custom_file"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "url": "isn't used by 'custom_file' source PDFs. Remove it",
+          "template_version": "isn't used by 'custom_file' source PDFs. Remove it",
+          "processed": "isn't used by 'custom_file' source PDFs. Remove it"
+        }
+      },
+      "FieldComparisonCondition": {
+        "type": "object",
+        "required": [
+          "field",
+          "operator",
+          "value"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "gt",
+              "gte",
+              "lt",
+              "lte"
+            ]
+          },
+          "value": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "pattern": "^-?\\d+(\\.\\d+)?([eE][-+]?\\d+)?$",
+            "x-pattern-message": "must be a number, like 10 or 2.5"
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "range_max": "isn't used by 'gt', 'gte', 'lt' or 'lte' conditions. Remove it"
+        }
+      },
+      "FieldEqualsCondition": {
+        "type": "object",
+        "required": [
+          "field",
+          "operator",
+          "value"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals"
+            ]
+          },
+          "value": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "range_max": "isn't used by 'equals' or 'not_equals' conditions. Remove it"
+        }
+      },
+      "FieldInCondition": {
+        "type": "object",
+        "required": [
+          "field",
+          "operator",
+          "value"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "const": "in"
+          },
+          "value": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ],
+              "minLength": 1
+            }
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "range_max": "isn't used by 'in' conditions. Remove it"
+        }
+      },
+      "FieldOverride": {
+        "type": "object",
+        "properties": {
+          "static": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "option_list": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "combined_field_names": {
+            "type": "string"
+          },
+          "combined_field_type": {
+            "type": "string",
+            "enum": [
+              "separator",
+              "format"
+            ]
+          },
+          "combined_field_separator": {
+            "type": "string"
+          },
+          "combined_field_format": {
+            "type": "string"
+          },
+          "integer": {
+            "type": "boolean"
+          },
+          "include_time": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "signature_allow_draw": {
+            "type": "boolean"
+          },
+          "signature_allow_type": {
+            "type": "boolean"
+          },
+          "barcode_symbology": {
+            "type": "string",
+            "enum": [
+              "code_25",
+              "code_39",
+              "code_93",
+              "code_128",
+              "ean_13",
+              "ean_8",
+              "upc_a",
+              "pdf417"
+            ]
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "x": {
+            "type": "number",
+            "minimum": 0
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "height": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "rotation": {
+            "type": "number",
+            "minimum": -360,
+            "maximum": 360
+          },
+          "display_type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "check",
+              "qrcode",
+              "barcode",
+              "image",
+              "shape"
+            ]
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "date_time_format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "typeface": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "Inconsolata",
+              "Roboto Mono",
+              "Ubuntu Mono",
+              "Menlo",
+              "Courier",
+              "Helvetica",
+              "Arial",
+              "Calibri",
+              "Open Sans",
+              "Roboto",
+              "Lato",
+              "Poppins",
+              "Public Sans",
+              "Questrial",
+              "Times New Roman",
+              "Dancing Script",
+              "Lovtony Script",
+              null
+            ]
+          },
+          "font_size": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "character_spacing": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 50
+          },
+          "bold": {
+            "type": "boolean"
+          },
+          "uppercase": {
+            "type": "boolean"
+          },
+          "strikethrough": {
+            "type": "boolean"
+          },
+          "keep_leading_spaces": {
+            "type": "boolean"
+          },
+          "overflow": {
+            "type": "string",
+            "enum": [
+              "shrink_to_fit",
+              "truncate"
+            ]
+          },
+          "multiline": {
+            "type": "boolean"
+          },
+          "multiline_lines": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 300
+          },
+          "max_length": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Fa-f0-9]{6}$",
+            "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+          },
+          "background_color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Fa-f0-9]{6}$",
+            "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+          },
+          "alignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center",
+              "right",
+              "justify"
+            ]
+          },
+          "v_alignment": {
+            "type": "string",
+            "enum": [
+              "bottom",
+              "center",
+              "top"
+            ]
+          },
+          "comb": {
+            "type": "boolean"
+          },
+          "comb_number_of_cells": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "comb_value_offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "shape_type": {
+            "type": "string",
+            "enum": [
+              "square",
+              "rectangle",
+              "circle",
+              "ellipse",
+              "triangle",
+              "polygon"
+            ]
+          },
+          "shape_sides": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 12
+          },
+          "shape_border_width": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "shape_border_color": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{6}$",
+            "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+          },
+          "shape_fill_color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Fa-f0-9]{6}$",
+            "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+          },
+          "check_character": {
+            "type": "string",
+            "enum": [
+              "&#10003;",
+              "&#10004;",
+              "&#10006;",
+              "&#10007;",
+              "&#10008;"
+            ]
+          },
+          "check_color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Fa-f0-9]{6}$",
+            "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+          },
+          "qrcode_color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Fa-f0-9]{6}$",
+            "x-pattern-message": "must be a 6-digit hex color without #, like FF0000"
+          },
+          "true_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "false_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "condition": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "string_condition_type": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "contains",
+              "starts_with",
+              "ends_with",
+              "regex"
+            ]
+          },
+          "number_condition_type": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "range",
+              "gte",
+              "gt",
+              "lte",
+              "lt"
+            ]
+          },
+          "number_condition_range_min": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "number_condition_range_max": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "number_condition_range_exclusive_min": {
+            "type": "boolean"
+          },
+          "number_condition_range_exclusive_max": {
+            "type": "boolean"
+          },
+          "invert_boolean_condition": {
+            "type": "boolean"
+          },
+          "decimal_places": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 99
+          },
+          "image_scale_type": {
+            "type": "string",
+            "enum": [
+              "fit",
+              "fill",
+              "stretch"
+            ]
+          },
+          "image_gravity": {
+            "type": "string",
+            "enum": [
+              "NorthWest",
+              "North",
+              "NorthEast",
+              "West",
+              "Center",
+              "East",
+              "SouthWest",
+              "South",
+              "SouthEast"
+            ]
+          }
+        },
+        "x-unknown-property-message": "isn't a field setting",
+        "x-not-allowed-properties": {
+          "id": "can't be changed for one submission. Change the field in the template",
+          "name": "can't be changed for one submission. Change the field in the template",
+          "type": "can't be changed for one submission. Change the field in the template",
+          "field_count": "can't be changed for one submission. Change the field in the template",
+          "fieldCount": "can't be changed for one submission. Change the field in the template",
+          "dependencies": "can't be changed for one submission. Change the field in the template",
+          "acroform_name": "can't be changed for one submission. Change the field in the template",
+          "allow_additional_items": "can't be changed for one submission. Change the field in the template",
+          "allowAdditionalItems": "can't be changed for one submission. Change the field in the template",
+          "min_items": "can't be changed for one submission. Change the field in the template",
+          "minItems": "can't be changed for one submission. Change the field in the template",
+          "max_items": "can't be changed for one submission. Change the field in the template",
+          "maxItems": "can't be changed for one submission. Change the field in the template",
+          "description": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "placeholder": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "metadata": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "minimum": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "maximum": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "exclusive_minimum": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "exclusiveMinimum": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "exclusive_maximum": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "exclusiveMaximum": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "currency": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "min_length": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "minLength": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "auto_calculate_max_length": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "autoCalculateMaxLength": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "color_field_name": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "colorFieldName": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "color_field_required": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "colorFieldRequired": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "background_color_field_name": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "backgroundColorFieldName": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "background_color_field_required": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "backgroundColorFieldRequired": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "check_color_field_name": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "checkColorFieldName": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "check_color_field_required": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "checkColorFieldRequired": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "qrcode_color_field_name": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "qrcodeColorFieldName": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "qrcode_color_field_required": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "qrcodeColorFieldRequired": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shape_border_color_field_name": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shapeBorderColorFieldName": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shape_border_color_field_required": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shapeBorderColorFieldRequired": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shape_fill_color_field_name": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shapeFillColorFieldName": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shape_fill_color_field_required": "can't be changed for one submission: the template's setting always applies. Change it in the template",
+          "shapeFillColorFieldRequired": "can't be changed for one submission: the template's setting always applies. Change it in the template"
+        },
+        "additionalProperties": false
+      },
+      "FieldPresenceCondition": {
+        "type": "object",
+        "required": [
+          "field",
+          "operator"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "present",
+              "blank"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "value": "isn't used by 'present' or 'blank' conditions. Remove it",
+          "range_max": "isn't used by 'present' or 'blank' conditions. Remove it"
+        }
+      },
+      "FieldRangeCondition": {
+        "type": "object",
+        "required": [
+          "field",
+          "operator"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "const": "range"
+          },
+          "value": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ],
+            "pattern": "^-?\\d+(\\.\\d+)?([eE][-+]?\\d+)?$",
+            "x-pattern-message": "must be a number, like 10 or 2.5"
+          },
+          "range_max": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ],
+            "pattern": "^-?\\d+(\\.\\d+)?([eE][-+]?\\d+)?$",
+            "x-pattern-message": "must be a number, like 10 or 2.5"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubmissionSourcePdf": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "submission"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "url": "isn't used by 'submission' source PDFs. Remove it",
+          "template_version": "isn't used by 'submission' source PDFs. Remove it",
+          "processed": "isn't used by 'submission' source PDFs. Remove it"
+        }
+      },
+      "TemplateSourcePdf": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "template"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "template_version": {
+            "type": "string",
+            "pattern": "^(\\d+(\\.\\d+(\\.\\d+)?)?|latest|draft)$",
+            "x-pattern-message": "must be a version like 1.2.3 or 1, or latest or draft"
+          },
+          "processed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "url": "isn't used by 'template' source PDFs. Remove it"
+        }
+      },
+      "UrlSourcePdf": {
+        "type": "object",
+        "required": [
+          "type",
+          "url"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "url"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false,
+        "x-not-allowed-properties": {
+          "id": "isn't used by 'url' source PDFs. Remove it",
+          "template_version": "isn't used by 'url' source PDFs. Remove it",
+          "processed": "isn't used by 'url' source PDFs. Remove it"
+        }
+      }
+    }
+  },
+  "formatMessages": {
+    "uri": "must be a full URL, like https://example.com",
+    "date-time": "must be a date and time in RFC 3339 format, like 2026-10-20T09:00:00Z"
+  }
+}

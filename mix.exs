@@ -4,7 +4,7 @@ defmodule Docspring.Mixfile do
   def project do
     [
       app: :docspring,
-      version: "3.3.0",
+      version: "4.0.0",
       elixir: "~> 1.18",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -36,7 +36,6 @@ defmodule Docspring.Mixfile do
   defp deps do
     [
       {:tesla, "~> 1.14"},
-      {:jason, "~> 1.4"},
       {:ex_doc, "~> 0.37.3", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
