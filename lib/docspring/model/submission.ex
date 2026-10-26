@@ -25,6 +25,7 @@ defmodule Docspring.Model.Submission do
     :signature_requests,
     :actions,
     :truncated_text,
+    :output_formats,
     :files,
     :preview_generated_at,
     :expired,
@@ -52,6 +53,7 @@ defmodule Docspring.Model.Submission do
     :signature_requests => [Docspring.Model.SignatureRequest.t],
     :actions => [Docspring.Model.SubmissionAction.t],
     :truncated_text => %{optional(String.t) => [String.t]} | nil,
+    :output_formats => [Docspring.Model.OutputFormat.t],
     :files => Docspring.Model.SubmissionFiles.t,
     :preview_generated_at => DateTime.t | nil,
     :expired => boolean(),
@@ -71,6 +73,7 @@ defmodule Docspring.Model.Submission do
      |> Deserializer.deserialize(:data_errors, :list, Docspring.Model.ErrorDetail)
      |> Deserializer.deserialize(:signature_requests, :list, Docspring.Model.SignatureRequest)
      |> Deserializer.deserialize(:actions, :list, Docspring.Model.SubmissionAction)
+     |> Deserializer.deserialize(:output_formats, :list, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:files, :struct, Docspring.Model.SubmissionFiles)
   end
 end

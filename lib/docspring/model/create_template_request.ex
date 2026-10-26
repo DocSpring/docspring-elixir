@@ -36,12 +36,16 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :slack_webhook_url,
     :defaults,
     :field_dependencies,
+    :predefined_fields,
+    :predefined_fields_sample_data,
     :html,
     :scss,
     :header_html,
     :footer_html,
     :html_engine_options,
     :cache_id,
+    :document_url,
+    :document_base64,
     :filename,
     :detect_fields,
     :field_source,
@@ -78,12 +82,16 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :slack_webhook_url => String.t | nil,
     :defaults => Docspring.Model.TemplateDefaultsInput.t | nil,
     :field_dependencies => [Docspring.Model.TemplateFieldDependencyInput.t] | nil,
+    :predefined_fields => [Docspring.Model.PredefinedFieldInput.t] | nil,
+    :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
     :scss => String.t | nil,
     :header_html => String.t | nil,
     :footer_html => String.t | nil,
     :html_engine_options => Docspring.Model.HtmlEngineOptionsInput.t | nil,
     :cache_id => String.t | nil,
+    :document_url => String.t | nil,
+    :document_base64 => String.t | nil,
     :filename => String.t | nil,
     :detect_fields => boolean() | nil,
     :field_source => Docspring.Model.FieldSetupSource.t | nil,
@@ -101,6 +109,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
      |> Deserializer.deserialize(:expiration_interval, :struct, Docspring.Model.ExpirationInterval)
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaultsInput)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependencyInput)
+     |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedFieldInput)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptionsInput)
      |> Deserializer.deserialize(:field_source, :struct, Docspring.Model.FieldSetupSource)
      |> Deserializer.deserialize(:field_naming, :struct, Docspring.Model.FieldSetupNaming)

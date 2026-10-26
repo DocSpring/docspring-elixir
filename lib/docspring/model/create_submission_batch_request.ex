@@ -12,6 +12,7 @@ defmodule Docspring.Model.CreateSubmissionBatchRequest do
     :template_id,
     :template_version,
     :test,
+    :output_formats,
     :submissions
   ]
 
@@ -20,6 +21,7 @@ defmodule Docspring.Model.CreateSubmissionBatchRequest do
     :template_id => String.t | nil,
     :template_version => String.t | nil,
     :test => boolean() | nil,
+    :output_formats => [Docspring.Model.OutputFormat.t] | nil,
     :submissions => [Docspring.Model.SubmissionInput.t]
   }
 
@@ -27,6 +29,7 @@ defmodule Docspring.Model.CreateSubmissionBatchRequest do
 
   def decode(value) do
     value
+     |> Deserializer.deserialize(:output_formats, :list, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:submissions, :list, Docspring.Model.SubmissionInput)
   end
 end

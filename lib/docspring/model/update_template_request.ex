@@ -35,6 +35,9 @@ defmodule Docspring.Model.UpdateTemplateRequest do
     :slack_webhook_url,
     :defaults,
     :field_dependencies,
+    :field_groups,
+    :predefined_fields,
+    :predefined_fields_sample_data,
     :html,
     :scss,
     :header_html,
@@ -70,6 +73,9 @@ defmodule Docspring.Model.UpdateTemplateRequest do
     :slack_webhook_url => String.t | nil,
     :defaults => Docspring.Model.TemplateDefaultsInput.t | nil,
     :field_dependencies => [Docspring.Model.TemplateFieldDependencyInput.t] | nil,
+    :field_groups => [Docspring.Model.FieldGroupInput.t] | nil,
+    :predefined_fields => [Docspring.Model.PredefinedFieldInput.t] | nil,
+    :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
     :scss => String.t | nil,
     :header_html => String.t | nil,
@@ -86,6 +92,8 @@ defmodule Docspring.Model.UpdateTemplateRequest do
      |> Deserializer.deserialize(:expiration_interval, :struct, Docspring.Model.ExpirationInterval)
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaultsInput)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependencyInput)
+     |> Deserializer.deserialize(:field_groups, :list, Docspring.Model.FieldGroupInput)
+     |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedFieldInput)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptionsInput)
   end
 end

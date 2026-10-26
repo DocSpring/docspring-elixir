@@ -13,6 +13,7 @@ defmodule Docspring.Model.SubmissionInput do
     :data,
     :metadata,
     :password,
+    :output_formats,
     :expires_in,
     :field_overrides,
     :html,
@@ -27,6 +28,7 @@ defmodule Docspring.Model.SubmissionInput do
     :data => %{optional(String.t) => any()} | nil,
     :metadata => %{optional(String.t) => any()} | nil,
     :password => String.t | nil,
+    :output_formats => [Docspring.Model.OutputFormat.t] | nil,
     :expires_in => integer() | nil,
     :field_overrides => %{optional(String.t) => Docspring.Model.FieldOverride.t} | nil,
     :html => String.t | nil,
@@ -39,6 +41,7 @@ defmodule Docspring.Model.SubmissionInput do
 
   def decode(value) do
     value
+     |> Deserializer.deserialize(:output_formats, :list, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:field_overrides, :map, Docspring.Model.FieldOverride)
   end
 end

@@ -1,3 +1,27 @@
+### 4.1.0 [October 27, 2026]
+
+- New: list_template_fields, add_template_fields, update_template_fields, remove_template_fields and
+  reorder_template_fields read and edit a template's fields (`Field`), with all their settings and their own conditional
+  logic (`dependencies`). A field's `y` is measured from the top of its page.
+- New: a template's `predefined_fields` (`PredefinedField`) and `predefined_fields_sample_data`, the field names that
+  people using the embedded template editor choose from. get_template returns them, and create_template and
+  update_template set them.
+- New: a template's `field_groups` (`FieldGroup`), the groups that its fields' names make, with their titles and the
+  settings of lists (`min_items`, `max_items`, `allow_additional_items`). get_template returns them, and update_template
+  changes them.
+- New: get_template_page_images returns an image of each page of a PDF template (`TemplatePageImages`), to see where
+  fields go.
+- New: get_template_diff says what changed in a template's draft since its latest published version, or in a published
+  version since the one before it (`TemplateDiff`).
+- New: validate_submission checks a submission's data and settings as create_submission does, without creating the
+  submission or using credits (`SubmissionValidation`). It doesn't check your account's credits.
+- New: the `png` output format, an image of each page of a submission's PDF (`files.png.pages`). Add it to
+  `output_formats` in create_submission or create_submission_batch (it adds `pdf`), or to a processed submission with
+  generate_submission_files.
+- create_template and update_template_document take a `document_url` (DocSpring downloads it) or a `document_base64`
+  instead of a `cache_id`. While the URL downloads, the template's `document.state` is `downloading`; if it can't be
+  downloaded, it's `download_failed` and `document.error_message` says why.
+
 ### 4.0.0 [October 26, 2026]
 
 - **BREAKING CHANGE**: This version calls DocSpring API v2 (`/api/v2`). The 3.x versions call API v1, which keeps

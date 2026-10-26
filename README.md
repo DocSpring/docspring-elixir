@@ -9,7 +9,7 @@ templates with your data, generates PDFs from HTML templates, combines PDFs and 
 The code in this repository is generated from DocSpring's OpenAPI spec ([About this SDK](#about-this-sdk)). Issues and
 pull requests are welcome.
 
-Version 4.0.0. Requires Elixir ~> 1.18.
+Version 4.1.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -18,7 +18,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 4.0.0"}
+    {:docspring, "~> 4.1.0"}
   ]
 end
 ```
@@ -87,6 +87,7 @@ Elixir code for every method.
 
 | Method | Description |
 | ------ | ----------- |
+| [`add_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#add_template_fields/4) | Add fields to a template |
 | [`copy_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#copy_template/3) | Copy a template |
 | [`create_combined_pdf`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_combined_pdf/3) | Combine PDFs |
 | [`create_custom_file_from_upload`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_custom_file_from_upload/3) | Create a custom file from an upload |
@@ -103,6 +104,7 @@ Elixir code for every method.
 | [`delete_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_webhook/3) | Delete a webhook |
 | [`expire_combined_pdf`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#expire_combined_pdf/3) | Expire a combined PDF |
 | [`expire_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#expire_submission/3) | Expire a submission |
+| [`generate_submission_files`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#generate_submission_files/4) | Generate more files |
 | [`generate_submission_preview`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#generate_submission_preview/3) | Generate a preview PDF |
 | [`get_combined_pdf`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_combined_pdf/3) | Get a combined PDF |
 | [`get_custom_file`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_custom_file/3) | Get a custom file |
@@ -112,28 +114,35 @@ Elixir code for every method.
 | [`get_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_submission/3) | Get a submission |
 | [`get_submission_batch`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_submission_batch/3) | Get a batch |
 | [`get_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template/3) | Get a template |
+| [`get_template_diff`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_diff/3) | Compare a version of a template with the one before it |
 | [`get_template_model_code`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_model_code/4) | Generate typed code for a template's submission data |
+| [`get_template_page_images`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_page_images/3) | Get images of a template's pages |
 | [`get_template_schema`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_schema/3) | Get the JSON Schema of a template's submission data |
 | [`get_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_webhook/3) | Get a webhook |
 | [`list_combined_pdfs`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_combined_pdfs/2) | List combined PDFs |
 | [`list_custom_files`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_custom_files/2) | List custom files |
 | [`list_folders`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_folders/2) | List folders |
 | [`list_submissions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_submissions/2) | List submissions |
+| [`list_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_template_fields/3) | List a template's fields |
 | [`list_template_submissions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_template_submissions/3) | List a template's submissions |
 | [`list_templates`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_templates/2) | List templates |
 | [`list_webhooks`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_webhooks/2) | List webhooks |
 | [`move_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#move_folder/4) | Move a folder |
 | [`move_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#move_template/4) | Move a template to a folder |
 | [`publish_template_version`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#publish_template_version/4) | Publish a template version |
+| [`remove_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#remove_template_fields/4) | Remove fields from a template |
 | [`rename_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#rename_folder/4) | Rename a folder |
+| [`reorder_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#reorder_template_fields/4) | Reorder a template's fields |
 | [`restore_template_version`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#restore_template_version/4) | Restore a template version |
 | [`test_authentication`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#test_authentication/2) | Test authentication |
 | [`update_signature_request`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_signature_request/4) | Update a signature request |
 | [`update_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template/4) | Update a template |
 | [`update_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template_document/4) | Replace a template's PDF |
+| [`update_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template_fields/4) | Update a template's fields |
 | [`update_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_webhook/4) | Update a webhook |
 | [`upload_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template/3) | Create a PDF template from an uploaded PDF |
 | [`upload_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template_document/4) | Replace a template's PDF with an uploaded PDF |
+| [`validate_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#validate_submission/4) | Check a submission without creating it |
 
 ## Errors
 

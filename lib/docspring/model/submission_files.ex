@@ -10,13 +10,15 @@ defmodule Docspring.Model.SubmissionFiles do
   defstruct [
     :pdf,
     :audit_trail,
-    :preview
+    :preview,
+    :png
   ]
 
   @type t :: %__MODULE__{
     :pdf => Docspring.Model.GeneratedFile.t | nil,
     :audit_trail => Docspring.Model.GeneratedFile.t | nil,
-    :preview => Docspring.Model.GeneratedFile.t | nil
+    :preview => Docspring.Model.GeneratedFile.t | nil,
+    :png => Docspring.Model.PageImages.t | nil
   }
 
   alias Docspring.Deserializer
@@ -26,6 +28,7 @@ defmodule Docspring.Model.SubmissionFiles do
      |> Deserializer.deserialize(:pdf, :struct, Docspring.Model.GeneratedFile)
      |> Deserializer.deserialize(:audit_trail, :struct, Docspring.Model.GeneratedFile)
      |> Deserializer.deserialize(:preview, :struct, Docspring.Model.GeneratedFile)
+     |> Deserializer.deserialize(:png, :struct, Docspring.Model.PageImages)
   end
 end
 

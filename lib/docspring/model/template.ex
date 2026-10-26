@@ -47,6 +47,9 @@ defmodule Docspring.Model.Template do
     :updated_at,
     :defaults,
     :field_dependencies,
+    :field_groups,
+    :predefined_fields,
+    :predefined_fields_sample_data,
     :html,
     :scss,
     :header_html,
@@ -96,6 +99,9 @@ defmodule Docspring.Model.Template do
     :updated_at => DateTime.t,
     :defaults => Docspring.Model.TemplateDefaults.t,
     :field_dependencies => [Docspring.Model.TemplateFieldDependency.t],
+    :field_groups => [Docspring.Model.FieldGroup.t],
+    :predefined_fields => [Docspring.Model.PredefinedField.t],
+    :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
     :scss => String.t | nil,
     :header_html => String.t | nil,
@@ -117,6 +123,8 @@ defmodule Docspring.Model.Template do
      |> Deserializer.deserialize(:last_changed_by, :struct, Docspring.Model.TemplateActor)
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaults)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependency)
+     |> Deserializer.deserialize(:field_groups, :list, Docspring.Model.FieldGroup)
+     |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedField)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptions)
      |> Deserializer.deserialize(:versions, :list, Docspring.Model.TemplateVersion)
   end

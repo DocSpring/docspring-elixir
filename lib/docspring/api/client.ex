@@ -10,6 +10,44 @@ defmodule Docspring.Api.Client do
   import Docspring.RequestBuilder
 
   @doc """
+  Add fields to a template
+  Adds fields to a template's draft and returns all of its fields. Publish a version for submissions of published versions to have them. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (AddTemplateFieldsRequest): The fields to add to the template's draft.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec add_template_fields(Tesla.Env.client, String.t, Docspring.Model.AddTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def add_template_fields(connection, template_id, body, _opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/fields")
+      |> add_param(:body, :body, body)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "addTemplateFields")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.TemplateFields},
+      {409, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Copy a template
   Copies a template (its draft, or a published version) into a new template.
 
@@ -257,7 +295,7 @@ defmodule Docspring.Api.Client do
   - `body` (CreateSubmissionRequest): The submission's data and settings.
   - `opts` (keyword): Optional parameters
     - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published).
-    - `:wait` (boolean()): Wait until the PDF has been generated before responding. Default true on sync.api hosts.
+    - `:wait` (boolean()): Wait until the files have been generated before responding. Default true on sync.api hosts.
 
   ### Returns
 
@@ -345,7 +383,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `body` (CreateTemplateRequest): The template to create.
   - `opts` (keyword): Optional parameters
-    - `:wait` (boolean()): Wait until the PDF has been processed before responding. Default true on sync.api hosts.
+    - `:wait` (boolean()): Wait until the PDF has been processed, and a `document_url` downloaded, before responding. Default true on sync.api hosts.
 
   ### Returns
 
@@ -624,6 +662,50 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Submission},
       {403, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Generate more files
+  Adds formats to a processed submission's files, in the background: `png`, a PNG image of each page of the PDF (up to 100 pages). To make them with the submission, add them to `output_formats` when you create it.  Each new file is listed in `files` while it's made: on sync.api hosts the request waits for them (unless you pass `wait=false`), otherwise poll GET /submissions/{submission_id} until none of their `state` is `pending`. A file that couldn't be made has the state `error` and an `error_message`, and the submission stays processed. Asking for a format the submission already has (or is making) changes nothing. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `submission_id` (String.t): The submission's ID.
+  - `body` (GenerateSubmissionFilesRequest): The formats to make.
+  - `opts` (keyword): Optional parameters
+    - `:wait` (boolean()): Wait until the files have been generated before responding. Default true on sync.api hosts.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec generate_submission_files(Tesla.Env.client, String.t, Docspring.Model.GenerateSubmissionFilesRequest.t, keyword()) :: {:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def generate_submission_files(connection, submission_id, body, opts \\ []) do
+    optional_params = %{
+      :wait => :query
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/submissions/#{submission_id}/generate_files")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "generateSubmissionFiles")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.Submission},
+      {409, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -949,6 +1031,47 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Compare a version of a template with the one before it
+  Returns what changed in the template's draft since its latest published version (or in a published version since the one before it): fields added, removed, changed and moved, the settings that changed, and whether the document was replaced. Check it before you publish a version. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `opts` (keyword): Optional parameters
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateDiff.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_template_diff(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.TemplateDiff.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_template_diff(connection, template_id, opts \\ []) do
+    optional_params = %{
+      :version => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/diff")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "getTemplateDiff")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplateDiff},
+      {409, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Generate typed code for a template's submission data
   Generates types for a template's submission data in TypeScript, JavaScript, Ruby, Python, PHP, Java, C#, Elixir or Go, so your app catches mistakes before it calls the API. `root_type_name` is the type of the whole `data` object. Java returns every class in `code`, each under a `// ClassName.java` comment. A template with no named fields returns 422. 
 
@@ -986,6 +1109,47 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.TemplateModelCode},
       {422, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get images of a template's pages
+  Returns a JPEG image of each page of a PDF template's PDF, with temporary links to download them: the draft's PDF, or a published version's. Use them to see the pages that fields are placed on. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `opts` (keyword): Optional parameters
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplatePageImages.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_template_page_images(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.TemplatePageImages.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_template_page_images(connection, template_id, opts \\ []) do
+    optional_params = %{
+      :version => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/page_images")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "getTemplatePageImages")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplatePageImages},
+      {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
@@ -1242,6 +1406,47 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  List a template's fields
+  Returns a template's fields with all of their settings, page by page: the draft's fields, or a published version's. A PDF template's fields are placed on its pages: GET /templates/{template_id}/page_images has images of the pages. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `opts` (keyword): Optional parameters
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec list_template_fields(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def list_template_fields(connection, template_id, opts \\ []) do
+    optional_params = %{
+      :version => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/fields")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "listTemplateFields")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplateFields},
+      {409, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   List a template's submissions
   Returns a template's submissions (from every version of the template), newest first.
 
@@ -1464,7 +1669,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Publish a template version
-  Publishes the template's draft as a new version that doesn't change. `version_type` says which part of the latest version number goes up. 
+  Publishes the template's draft as a new version that doesn't change. `version_type` says which part of the latest version number goes up. While the template's PDF is downloading or being processed, or DocSpring is setting up its fields, it returns a 409 that says so. 
 
   ### Parameters
 
@@ -1501,6 +1706,43 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Remove fields from a template
+  Removes fields from a template's draft and returns the fields that are left. Conditional logic that used only the removed fields is removed too. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (RemoveTemplateFieldsRequest): The fields to remove from the template's draft.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec remove_template_fields(Tesla.Env.client, String.t, Docspring.Model.RemoveTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def remove_template_fields(connection, template_id, body, _opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/fields/remove")
+      |> add_param(:body, :body, body)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "removeTemplateFields")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplateFields},
+      {422, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Rename a folder
   Renames a folder. The name must be unique within its parent folder. 
 
@@ -1531,6 +1773,43 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.Folder},
+      {422, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Reorder a template's fields
+  Changes the order of the fields in a template's draft and returns them in their new order. Send every field's ID: each field stays on its page, and a page's fields are printed in this order, so a later field prints over an earlier one where they overlap. Their values are in this order in the template's data schema and forms. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (ReorderTemplateFieldsRequest): The new order of the fields in the template's draft.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec reorder_template_fields(Tesla.Env.client, String.t, Docspring.Model.ReorderTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def reorder_template_fields(connection, template_id, body, _opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/fields/reorder")
+      |> add_param(:body, :body, body)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "reorderTemplateFields")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplateFields},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
@@ -1647,7 +1926,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Update a template
-  Changes a template's draft. Properties left out keep their values. `defaults` and `html_engine_options` replace the whole object. Setting `parent_folder_id` moves the template and all of its published versions. 
+  Changes a template's draft. Properties left out keep their values. `defaults` and `html_engine_options` replace the whole object, and `field_groups` changes only the groups it lists. Setting `parent_folder_id` moves the template and all of its published versions. 
 
   ### Parameters
 
@@ -1677,23 +1956,23 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Template},
       {409, Docspring.Model.ErrorResponse},
-      {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end
 
   @doc """
   Replace a template's PDF
-  Replaces a PDF template's PDF with one you uploaded with the presigned upload (GET /uploads/presign). The fields stay where they are, unless `reimport_fields` replaces them with the new PDF's fillable fields. To send the PDF with the request instead, use PUT /templates/{template_id}/document/upload. 
+  Replaces a PDF template's PDF with one you uploaded with the presigned upload (GET /uploads/presign) (`cache_id`), a link to download it from (`document_url`), or the file in base64 (`document_base64`). The fields stay where they are, unless `reimport_fields` replaces them with the new PDF's fillable fields. To send the PDF as `multipart/form-data` instead, use PUT /templates/{template_id}/document/upload. 
 
   ### Parameters
 
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): The template's ID.
-  - `body` (UpdateTemplateDocumentRequest): The new PDF.
+  - `body` (UpdateTemplateDocumentRequest): The new PDF, as one of `cache_id`, `document_url` and `document_base64`.
   - `opts` (keyword): Optional parameters
-    - `:wait` (boolean()): Wait until the PDF has been processed before responding. Default true on sync.api hosts.
+    - `:wait` (boolean()): Wait until the PDF has been processed, and a `document_url` downloaded, before responding. Default true on sync.api hosts.
 
   ### Returns
 
@@ -1721,6 +2000,43 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Template},
       {409, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Update a template's fields
+  Changes fields of a template's draft and returns all of its fields. Settings left out keep their values. A shared setting (`type`, `required`, `default`, ...) changes for every field with the same name. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (UpdateTemplateFieldsRequest): The fields to change in the template's draft.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec update_template_fields(Tesla.Env.client, String.t, Docspring.Model.UpdateTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def update_template_fields(connection, template_id, body, _opts \\ []) do
+    request =
+      %{}
+      |> method(:put)
+      |> url("/templates/#{template_id}/fields")
+      |> add_param(:body, :body, body)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "updateTemplateFields")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplateFields},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
@@ -1773,7 +2089,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `document` (String.t): The PDF.
   - `opts` (keyword): Optional parameters
-    - `:wait` (boolean()): Wait until the PDF has been processed before responding. Default true on sync.api hosts.
+    - `:wait` (boolean()): Wait until the PDF has been processed, and a `document_url` downloaded, before responding. Default true on sync.api hosts.
     - `:name` (String.t): The template's name.
     - `:description` (String.t): The template's description.
     - `:parent_folder_id` (String.t): The folder to put the template in. Left out, it's created at the root.
@@ -1832,7 +2148,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `document` (String.t): The new PDF.
   - `opts` (keyword): Optional parameters
-    - `:wait` (boolean()): Wait until the PDF has been processed before responding. Default true on sync.api hosts.
+    - `:wait` (boolean()): Wait until the PDF has been processed, and a `document_url` downloaded, before responding. Default true on sync.api hosts.
     - `:reimport_fields` (boolean()): Replace all of the template's fields with the fillable fields in the new PDF, once DocSpring has processed it (`document.field_reimport_state`). As on a first upload, the default typeface, font size, bold and color are taken from the PDF's fields; the template's other settings are kept. If the PDF has no fillable fields, the template keeps its fields. A locked template can't re-import its fields.
 
   ### Returns
@@ -1863,6 +2179,49 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Template},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Check a submission without creating it
+  Checks a submission as creating it would (its data against the template's fields, its settings and signature requests) without saving it, generating anything or using credits. It doesn't check your account's credits. The response says whether the submission is valid, and if not, has the error that creating it would return. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (ValidateSubmissionRequest): The submission's data and settings.
+  - `opts` (keyword): Optional parameters
+    - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published).
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.SubmissionValidation.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec validate_submission(Tesla.Env.client, String.t, Docspring.Model.ValidateSubmissionRequest.t, keyword()) :: {:ok, Docspring.Model.SubmissionValidation.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def validate_submission(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :version => :query
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/submissions/validate")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "validateSubmission")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.SubmissionValidation},
+      {404, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse}
     ])
   end

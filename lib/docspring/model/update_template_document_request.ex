@@ -3,18 +3,22 @@
 
 defmodule Docspring.Model.UpdateTemplateDocumentRequest do
   @moduledoc """
-  The new PDF.
+  The new PDF, as one of `cache_id`, `document_url` and `document_base64`.
   """
 
   @derive JSON.Encoder
   defstruct [
     :cache_id,
+    :document_url,
+    :document_base64,
     :filename,
     :reimport_fields
   ]
 
   @type t :: %__MODULE__{
-    :cache_id => String.t,
+    :cache_id => String.t | nil,
+    :document_url => String.t | nil,
+    :document_base64 => String.t | nil,
     :filename => String.t | nil,
     :reimport_fields => boolean() | nil
   }

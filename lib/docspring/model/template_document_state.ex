@@ -12,7 +12,7 @@ defmodule Docspring.Model.TemplateDocumentState do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["pending", "processed", "password_required", "malformed_pdf", "unknown_error"]
+  def values, do: ["pending", "processed", "password_required", "malformed_pdf", "unknown_error", "downloading", "download_failed"]
 
   def decode(value), do: value
 end

@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.TemplateFieldDependencyAction do
   @moduledoc """
-  What a conditional logic rule does to its target fields.
+  What a conditional logic rule does to the fields it applies to.
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """
