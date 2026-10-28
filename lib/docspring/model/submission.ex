@@ -21,18 +21,18 @@ defmodule Docspring.Model.Submission do
     :data_errors,
     :error_message,
     :metadata,
+    :files,
+    :expired,
+    :expires_at,
+    :processed_at,
+    :created_at,
+    :updated_at,
     :has_password,
     :signature_requests,
     :actions,
     :truncated_text,
     :output_formats,
-    :files,
-    :preview_generated_at,
-    :expired,
-    :expires_at,
-    :processed_at,
-    :created_at,
-    :updated_at
+    :preview_generated_at
   ]
 
   @type t :: %__MODULE__{
@@ -49,18 +49,18 @@ defmodule Docspring.Model.Submission do
     :data_errors => [Docspring.Model.ErrorDetail.t],
     :error_message => String.t | nil,
     :metadata => %{optional(String.t) => any()},
+    :files => Docspring.Model.SubmissionFiles.t,
+    :expired => boolean(),
+    :expires_at => DateTime.t | nil,
+    :processed_at => DateTime.t | nil,
+    :created_at => DateTime.t,
+    :updated_at => DateTime.t,
     :has_password => boolean(),
     :signature_requests => [Docspring.Model.SignatureRequest.t],
     :actions => [Docspring.Model.SubmissionAction.t],
     :truncated_text => %{optional(String.t) => [String.t]} | nil,
     :output_formats => [Docspring.Model.OutputFormat.t],
-    :files => Docspring.Model.SubmissionFiles.t,
-    :preview_generated_at => DateTime.t | nil,
-    :expired => boolean(),
-    :expires_at => DateTime.t | nil,
-    :processed_at => DateTime.t | nil,
-    :created_at => DateTime.t,
-    :updated_at => DateTime.t
+    :preview_generated_at => DateTime.t | nil
   }
 
   alias Docspring.Deserializer
@@ -71,10 +71,10 @@ defmodule Docspring.Model.Submission do
      |> Deserializer.deserialize(:source, :struct, Docspring.Model.SubmissionSource)
      |> Deserializer.deserialize(:state, :struct, Docspring.Model.SubmissionState)
      |> Deserializer.deserialize(:data_errors, :list, Docspring.Model.ErrorDetail)
+     |> Deserializer.deserialize(:files, :struct, Docspring.Model.SubmissionFiles)
      |> Deserializer.deserialize(:signature_requests, :list, Docspring.Model.SignatureRequest)
      |> Deserializer.deserialize(:actions, :list, Docspring.Model.SubmissionAction)
      |> Deserializer.deserialize(:output_formats, :list, Docspring.Model.OutputFormat)
-     |> Deserializer.deserialize(:files, :struct, Docspring.Model.SubmissionFiles)
   end
 end
 

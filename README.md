@@ -9,7 +9,7 @@ templates with your data, generates PDFs from HTML templates, combines PDFs and 
 The code in this repository is generated from DocSpring's OpenAPI spec ([About this SDK](#about-this-sdk)). Issues and
 pull requests are welcome.
 
-Version 4.1.0. Requires Elixir ~> 1.18.
+Version 4.2.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -18,7 +18,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 4.1.0"}
+    {:docspring, "~> 4.2.0"}
   ]
 end
 ```
@@ -97,6 +97,7 @@ Elixir code for every method.
 | [`create_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_submission/4) | Generate a PDF |
 | [`create_submission_batch`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_submission_batch/3) | Generate PDFs in a batch |
 | [`create_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_template/3) | Create a template |
+| [`create_template_preview`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_template_preview/4) | Preview a template with data |
 | [`create_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_webhook/3) | Create a webhook |
 | [`delete_custom_file`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_custom_file/3) | Delete a custom file |
 | [`delete_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_folder/3) | Delete a folder |
@@ -117,6 +118,7 @@ Elixir code for every method.
 | [`get_template_diff`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_diff/3) | Compare a version of a template with the one before it |
 | [`get_template_model_code`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_model_code/4) | Generate typed code for a template's submission data |
 | [`get_template_page_images`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_page_images/3) | Get images of a template's pages |
+| [`get_template_preview`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_preview/4) | Get a template preview |
 | [`get_template_schema`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_schema/3) | Get the JSON Schema of a template's submission data |
 | [`get_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_webhook/3) | Get a webhook |
 | [`list_combined_pdfs`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_combined_pdfs/2) | List combined PDFs |
@@ -175,6 +177,7 @@ The fork changes the Elixir generator:
 On top of the generated code, we add:
 
 - A client constructor that reads your credentials, region and host from the environment.
+- `Docspring.Webhooks.verify_webhook_signature(payload, signature_header, secret)` checks a webhook request's `X-DocSpring-Signature` header, with `:tolerance` and `:now` options.
 
 Each release regenerates every file, so a change made only here would be lost in the next one. Issues and pull
 requests are welcome all the same: [open an issue](https://github.com/DocSpring/docspring-elixir/issues) or a pull request, or email

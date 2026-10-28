@@ -9,11 +9,11 @@ defmodule Docspring.Model.TemplateDocument do
   @derive JSON.Encoder
   defstruct [
     :filename,
-    :md5,
     :state,
     :error_message,
-    :field_reimport_state,
     :page_count,
+    :md5,
+    :field_reimport_state,
     :page_dimensions,
     :has_fillable_fields,
     :page_processing_statuses,
@@ -24,11 +24,11 @@ defmodule Docspring.Model.TemplateDocument do
 
   @type t :: %__MODULE__{
     :filename => String.t | nil,
-    :md5 => String.t | nil,
     :state => Docspring.Model.TemplateDocumentState.t,
     :error_message => String.t | nil,
-    :field_reimport_state => Docspring.Model.FieldReimportState.t,
     :page_count => integer(),
+    :md5 => String.t | nil,
+    :field_reimport_state => Docspring.Model.FieldReimportState.t,
     :page_dimensions => [[number()]] | nil,
     :has_fillable_fields => boolean() | nil,
     :page_processing_statuses => [Docspring.Model.TemplatePageProcessingStatus.t],

@@ -12,7 +12,7 @@ defmodule Docspring.Model.ErrorCode do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["invalid_request", "unauthorized", "payment_required", "insufficient_credits", "forbidden", "upgrade_required", "account_suspended", "not_found", "method_not_allowed", "conflict", "gone", "request_too_large", "unsupported_media_type", "validation_failed", "invalid_data", "rate_limited", "internal_error", "bad_gateway", "service_unavailable", "upstream_timeout", "polling_timeout"]
+  def values, do: ["invalid_request", "unauthorized", "payment_required", "insufficient_credits", "forbidden", "upgrade_required", "account_suspended", "not_found", "method_not_allowed", "conflict", "gone", "request_too_large", "unsupported_media_type", "validation_failed", "invalid_data", "rate_limited", "internal_error", "bad_gateway", "service_unavailable", "upstream_timeout", "polling_timeout", "idempotency_key_in_use", "idempotency_key_reused"]
 
   def decode(value), do: value
 end

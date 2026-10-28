@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.TemplateSummary do
   @moduledoc """
-  A template in a list. Get a template by its ID for its HTML, defaults, field dependency rules and published versions.
+  A template in a list: its name, type, folder, latest published version and whether it's ready. Get a template by its ID for its settings, its PDF in full, its HTML, defaults, field dependency rules and published versions.
   """
 
   @derive JSON.Encoder
@@ -16,33 +16,10 @@ defmodule Docspring.Model.TemplateSummary do
     :document,
     :parent_folder_id,
     :path,
-    :version,
     :latest_version,
     :version_published_at,
     :locked,
-    :add_signature_request_submission_id_footers,
-    :ai_field_naming_language,
-    :allow_additional_properties,
-    :allow_skipping_optional_fields,
-    :default_form_mode,
-    :editable_submissions,
-    :embed_domains,
-    :embed_edit_allow_settings,
-    :embed_edit_allow_versioning,
-    :embed_edit_allow_document_replacement,
-    :encrypt_pdfs,
-    :has_encrypt_pdfs_password,
-    :expire_submissions,
-    :expire_after,
-    :expiration_interval,
-    :merge_audit_trail_pdf,
-    :parse_dates_using_template_date_format,
-    :public_submissions,
-    :public_web_form,
-    :redirect_url,
-    :has_slack_webhook_url,
     :last_changed_at,
-    :last_changed_by,
     :created_at,
     :updated_at
   ]
@@ -53,36 +30,13 @@ defmodule Docspring.Model.TemplateSummary do
     :description => String.t | nil,
     :template_type => Docspring.Model.TemplateType.t,
     :ready => boolean(),
-    :document => Docspring.Model.TemplateDocument.t | nil,
+    :document => Docspring.Model.TemplateDocumentSummary.t | nil,
     :parent_folder_id => String.t | nil,
     :path => String.t,
-    :version => String.t | nil,
     :latest_version => String.t | nil,
     :version_published_at => DateTime.t | nil,
     :locked => boolean(),
-    :add_signature_request_submission_id_footers => boolean(),
-    :ai_field_naming_language => Docspring.Model.AiFieldNamingLanguage.t | nil,
-    :allow_additional_properties => boolean(),
-    :allow_skipping_optional_fields => boolean(),
-    :default_form_mode => Docspring.Model.TemplateFormMode.t,
-    :editable_submissions => boolean(),
-    :embed_domains => [String.t],
-    :embed_edit_allow_settings => boolean(),
-    :embed_edit_allow_versioning => boolean(),
-    :embed_edit_allow_document_replacement => boolean(),
-    :encrypt_pdfs => boolean(),
-    :has_encrypt_pdfs_password => boolean(),
-    :expire_submissions => boolean(),
-    :expire_after => integer(),
-    :expiration_interval => Docspring.Model.ExpirationInterval.t,
-    :merge_audit_trail_pdf => boolean(),
-    :parse_dates_using_template_date_format => boolean(),
-    :public_submissions => boolean(),
-    :public_web_form => boolean(),
-    :redirect_url => String.t | nil,
-    :has_slack_webhook_url => boolean(),
     :last_changed_at => DateTime.t | nil,
-    :last_changed_by => Docspring.Model.TemplateActor.t | nil,
     :created_at => DateTime.t,
     :updated_at => DateTime.t
   }
@@ -92,11 +46,7 @@ defmodule Docspring.Model.TemplateSummary do
   def decode(value) do
     value
      |> Deserializer.deserialize(:template_type, :struct, Docspring.Model.TemplateType)
-     |> Deserializer.deserialize(:document, :struct, Docspring.Model.TemplateDocument)
-     |> Deserializer.deserialize(:ai_field_naming_language, :struct, Docspring.Model.AiFieldNamingLanguage)
-     |> Deserializer.deserialize(:default_form_mode, :struct, Docspring.Model.TemplateFormMode)
-     |> Deserializer.deserialize(:expiration_interval, :struct, Docspring.Model.ExpirationInterval)
-     |> Deserializer.deserialize(:last_changed_by, :struct, Docspring.Model.TemplateActor)
+     |> Deserializer.deserialize(:document, :struct, Docspring.Model.TemplateDocumentSummary)
   end
 end
 

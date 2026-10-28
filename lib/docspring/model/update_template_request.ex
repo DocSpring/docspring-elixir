@@ -42,7 +42,8 @@ defmodule Docspring.Model.UpdateTemplateRequest do
     :scss,
     :header_html,
     :footer_html,
-    :html_engine_options
+    :html_engine_options,
+    :html_escape_data
   ]
 
   @type t :: %__MODULE__{
@@ -80,7 +81,8 @@ defmodule Docspring.Model.UpdateTemplateRequest do
     :scss => String.t | nil,
     :header_html => String.t | nil,
     :footer_html => String.t | nil,
-    :html_engine_options => Docspring.Model.HtmlEngineOptionsInput.t | nil
+    :html_engine_options => Docspring.Model.HtmlEngineOptionsInput.t | nil,
+    :html_escape_data => boolean() | nil
   }
 
   alias Docspring.Deserializer

@@ -13,7 +13,7 @@ defmodule Docspring.Model.SubmissionList do
   ]
 
   @type t :: %__MODULE__{
-    :data => [Docspring.Model.Submission.t],
+    :data => [Docspring.Model.SubmissionSummary.t],
     :next_cursor => String.t | nil
   }
 
@@ -21,7 +21,7 @@ defmodule Docspring.Model.SubmissionList do
 
   def decode(value) do
     value
-     |> Deserializer.deserialize(:data, :list, Docspring.Model.Submission)
+     |> Deserializer.deserialize(:data, :list, Docspring.Model.SubmissionSummary)
   end
 end
 

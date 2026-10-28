@@ -1,3 +1,40 @@
+### 4.2.0 [October 29, 2026]
+
+- **BREAKING CHANGE**: list_templates returns a shorter `TemplateSummary`: a template's name, description, type, folder
+  (`parent_folder_id`, `path`), latest published version, whether it's `ready`, and its PDF's file name, state, error
+  and page count (`document`, a `TemplateDocumentSummary`). get_template returns its settings and the rest.
+- **BREAKING CHANGE**: list_submissions and list_template_submissions return `SubmissionSummary` instead of
+  `Submission`: without signature requests and uploads, with `data` only when you pass `include_data` (as before), and
+  with `files` only when you pass the new `include_files` (without the links to page images). get_submission returns the
+  whole submission.
+- New: the template webhook events (version 4) send the whole template, as get_template returns it, without its
+  `embed_edit_token`. They sent the settings without the rest.
+- New: list_submissions and list_template_submissions take a `state` filter: one state, such as `invalid_data` or
+  `error`.
+- New: get_template_model_code takes `just_types`, for the types alone, without the code that converts and checks JSON
+  (TypeScript, Ruby, Python, Java, C#, Elixir and Go: JavaScript and PHP code is the same either way).
+- New: create_submission, create_submission_batch and create_combined_pdf take an `Idempotency-Key` header. A request
+  repeated with the same key within 24 hours returns the first response and creates nothing. The same key with a
+  different request is a 422, and a repeat while the first request is still running is a 409.
+- New: create_template_preview and get_template_preview fill an HTML or PDF template's draft (or a published version)
+  with your data and return PNG images of its pages, not a PDF, so you can check how it prints before you publish it or
+  send live data. A preview creates no submission and uses no credits. Get the preview until its `state` is
+  `processed`. Previews are watermarked like test PDFs.
+- New: HTML templates' `html_escape_data` setting HTML-escapes the values they print (`{{ value }}`). It's on for new
+  templates and off for existing ones; `{{ value | raw }}` prints a value as it is.
+- New: `Docspring.Webhooks.verify_webhook_signature(payload, signature_header, secret)` checks a webhook request's
+  `X-DocSpring-Signature` header. Pass it the request body exactly as it was received. It returns true or false, accepts
+  any `v1` that matches and rejects a timestamp more than 5 minutes old (the `:tolerance` option for another tolerance).
+- publish_template_version answers 409 when the draft hasn't changed since the latest published version, instead of
+  publishing a copy of it (code `conflict`). A template's first publish always works.
+- Every operation documents the 429 rate limit response (with `Retry-After`), and the creates that the sync hosts wait
+  for document their 504 (the record was saved: get it by the ID in the error).
+- Every optional field takes `null` in a submission's `data`, whatever its type, so model code that writes missing
+  values as null works. A null checkbox or group of fields (an object or a list) gets its defaults, as a missing key
+  does, and a null text, number, date, image or signature field prints blank, as before. Null in a required field is
+  still an error.
+- Template and webhook names can be up to 512 characters, up from 255.
+
 ### 4.1.0 [October 27, 2026]
 
 - New: list_template_fields, add_template_fields, update_template_fields, remove_template_fields and

@@ -69,8 +69,9 @@ keeps it.
   (https://docspring.com/docs/webhooks/overview/). A webhook created with API v2 sends events in API v2's format
   (version 4).
 - Verify each request's `X-DocSpring-Signature` header before acting on it: an HMAC-SHA256 of `{t}.{raw body}` with the
-  webhook's signing secret, computed over the raw body exactly as received
-  (https://docspring.com/docs/webhooks/verifying-signatures/).
+  webhook's signing secret, where `t` must be within 5 minutes
+  (https://docspring.com/docs/webhooks/verifying-signatures/). Pass the raw body exactly as received, not parsed JSON,
+  to `Docspring.Webhooks.verify_webhook_signature(payload, signature_header, secret)`, which returns true or false.
 - No webhook is sent when a submission starts waiting for credits.
 
 ## Signature requests

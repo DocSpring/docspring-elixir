@@ -43,7 +43,8 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -86,7 +87,8 @@ defmodule Docspring.Api.Client do
       {422, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -100,6 +102,7 @@ defmodule Docspring.Api.Client do
   - `body` (CreateCombinedPdfRequest): The PDFs to merge, and the combined PDF's settings.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until the PDF has been generated before responding. Default true on sync.api hosts.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of creating another combined PDF. Send a new key with each new combined PDF, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` means the first request is still being processed: send the request again in a few seconds.
 
   ### Returns
 
@@ -109,7 +112,8 @@ defmodule Docspring.Api.Client do
   @spec create_combined_pdf(Tesla.Env.client, Docspring.Model.CreateCombinedPdfRequest.t, keyword()) :: {:ok, Docspring.Model.CombinedPdf.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def create_combined_pdf(connection, body, opts \\ []) do
     optional_params = %{
-      :wait => :query
+      :wait => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -129,7 +133,10 @@ defmodule Docspring.Api.Client do
       {422, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
       {402, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -164,7 +171,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {201, Docspring.Model.CustomFile},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -199,13 +207,14 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {201, Docspring.Model.Folder},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
   @doc """
   Record a signature request event
-  Records something that happened outside DocSpring in the signature request's audit trail: you sent the request to the person (`send_request`). The audit trail shows it as reported by your account. 
+  Records something that happened outside DocSpring in the signature request's audit trail: you sent the request to the person (`send_request`). The audit trail shows it as reported by your account. A finished (completed, declined or expired) signature request's audit trail takes no more events, and a test API token can't record one for a live signature request. 
 
   ### Parameters
 
@@ -234,9 +243,12 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {201, Docspring.Model.SignatureRequestEvent},
+      {403, Docspring.Model.ErrorResponse},
+      {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -280,7 +292,8 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -296,6 +309,7 @@ defmodule Docspring.Api.Client do
   - `opts` (keyword): Optional parameters
     - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published).
     - `:wait` (boolean()): Wait until the files have been generated before responding. Default true on sync.api hosts.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of creating another submission. Send a new key with each new submission, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` means the first request is still being processed: send the request again in a few seconds.
 
   ### Returns
 
@@ -306,7 +320,8 @@ defmodule Docspring.Api.Client do
   def create_submission(connection, template_id, body, opts \\ []) do
     optional_params = %{
       :version => :query,
-      :wait => :query
+      :wait => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -327,7 +342,10 @@ defmodule Docspring.Api.Client do
       {402, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -341,6 +359,7 @@ defmodule Docspring.Api.Client do
   - `body` (CreateSubmissionBatchRequest): The submissions to create, and the settings they share.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until every PDF in the batch has been generated before responding. Default true on sync.api hosts.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of creating another batch. Send a new key with each new batch, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` means the first request is still being processed: send the request again in a few seconds.
 
   ### Returns
 
@@ -350,7 +369,8 @@ defmodule Docspring.Api.Client do
   @spec create_submission_batch(Tesla.Env.client, Docspring.Model.CreateSubmissionBatchRequest.t, keyword()) :: {:ok, Docspring.Model.SubmissionBatch.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def create_submission_batch(connection, body, opts \\ []) do
     optional_params = %{
-      :wait => :query
+      :wait => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -370,7 +390,10 @@ defmodule Docspring.Api.Client do
       {422, Docspring.Model.ErrorResponse},
       {402, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -412,7 +435,52 @@ defmodule Docspring.Api.Client do
       {201, Docspring.Model.Template},
       {422, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Preview a template with data
+  Makes PNG images of a template's pages filled in with the data you send (not a PDF), so you can check how an HTML or PDF template prints with your data before you publish a version or send live data. It renders the template's draft, or the published `version` you ask for. A preview makes no submission and uses no credits, and its pages are watermarked like a test submission's PDF. It's `pending` while it renders: get it with GET /templates/{template_id}/previews/{preview_id} until it's `processed`, with an image of each page, or `error`. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (CreateTemplatePreviewRequest): The data to render the template with.
+  - `opts` (keyword): Optional parameters
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec create_template_preview(Tesla.Env.client, String.t, Docspring.Model.CreateTemplatePreviewRequest.t, keyword()) :: {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def create_template_preview(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :version => :query
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/previews")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "createTemplatePreview")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.TemplatePreview},
+      {409, Docspring.Model.ErrorResponse},
+      {422, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -447,7 +515,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {201, Docspring.Model.Webhook},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -482,7 +551,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.CustomFile},
       {403, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -517,7 +587,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Folder},
       {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -559,7 +630,8 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -593,7 +665,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Webhook},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -628,7 +701,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.CombinedPdf},
       {403, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -663,7 +737,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Submission},
       {403, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -707,7 +782,9 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -743,7 +820,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Submission},
       {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -777,7 +855,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.CombinedPdf},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -811,7 +890,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.CustomFile},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -845,7 +925,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Folder},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -877,7 +958,8 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.UploadPresign},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -911,7 +993,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.SignatureRequest},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -945,7 +1028,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Submission},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -985,7 +1069,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.SubmissionBatch},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1026,7 +1111,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Template},
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1067,13 +1153,14 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplateDiff},
       {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
   @doc """
   Generate typed code for a template's submission data
-  Generates types for a template's submission data in TypeScript, JavaScript, Ruby, Python, PHP, Java, C#, Elixir or Go, so your app catches mistakes before it calls the API. `root_type_name` is the type of the whole `data` object. Java returns every class in `code`, each under a `// ClassName.java` comment. A template with no named fields returns 422. 
+  Generates types for a template's submission data in TypeScript, JavaScript, Ruby, Python, PHP, Java, C#, Elixir or Go, so your app catches mistakes before it calls the API. `root_type_name` is the type of the whole `data` object, and `just_types=true` leaves out the code that converts JSON to and from the types. Java returns every class in `code`, each under a `// ClassName.java` comment. A template with no named fields returns 422. 
 
   ### Parameters
 
@@ -1082,6 +1169,7 @@ defmodule Docspring.Api.Client do
   - `lang` (ModelCodeLanguage): The language to generate the code in.
   - `opts` (keyword): Optional parameters
     - `:version` (String.t): The template version: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published), the version a submission uses by default.
+    - `:just_types` (boolean()): Return only the types (interfaces, classes or structs), without the code that converts JSON to and from them. Default false. JavaScript has no types and PHP no types-only code, so theirs is the same either way.
 
   ### Returns
 
@@ -1091,7 +1179,8 @@ defmodule Docspring.Api.Client do
   @spec get_template_model_code(Tesla.Env.client, String.t, Docspring.Model.ModelCodeLanguage.t, keyword()) :: {:ok, Docspring.Model.TemplateModelCode.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def get_template_model_code(connection, template_id, lang, opts \\ []) do
     optional_params = %{
-      :version => :query
+      :version => :query,
+      :just_types => :query
     }
 
     request =
@@ -1110,7 +1199,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplateModelCode},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1151,7 +1241,43 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplatePageImages},
       {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get a template preview
+  Returns a preview made with POST /templates/{template_id}/previews. Once it's `processed`, `pages` has a PNG image of each page with a temporary link to download it: a preview has no PDF. Previews are deleted an hour after they're created. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `preview_id` (String.t): The preview's ID.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_template_preview(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_template_preview(connection, template_id, preview_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/previews/#{preview_id}")
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "getTemplatePreview")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.TemplatePreview},
+      {404, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1191,7 +1317,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, %{}},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1225,7 +1352,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Webhook},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1266,7 +1394,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.CombinedPdfList},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1307,7 +1436,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.CustomFileList},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1350,13 +1480,14 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.FolderList},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
   @doc """
   List submissions
-  Returns the submissions in your account, newest first, one page at a time. Lists leave out each submission's `data` unless you pass `include_data=true`. 
+  Returns the submissions in your account, newest first, one page at a time. Each one is a summary: its `data` is null unless you pass `include_data=true`, and its `files` are empty unless you pass `include_files=true`. Get a submission by its ID for its signature requests, uploads and page images. 
 
   ### Parameters
 
@@ -1369,6 +1500,8 @@ defmodule Docspring.Api.Client do
     - `:include_data` (boolean()): Include each submission's `data` (null without it).
     - `:limit` (integer()): How many items to return (1-100, default 50).
     - `:cursor` (String.t): The previous page's `next_cursor`, to get the next page. It's the ID of that page's last item, so get the next page before you delete or change the items on this one.
+    - `:state` (SubmissionState): Only list submissions in this state (one state per request). The ones that failed are `invalid_data`, `error`, `syntax_error`, `image_download_failed` and `image_processing_failed`, and one still `pending` an hour after it was created is stuck.
+    - `:include_files` (boolean()): Include each submission's generated files and their download links (`files`, empty without it), without the page images' links.
 
   ### Returns
 
@@ -1384,7 +1517,9 @@ defmodule Docspring.Api.Client do
       :created_before => :query,
       :include_data => :query,
       :limit => :query,
-      :cursor => :query
+      :cursor => :query,
+      :state => :query,
+      :include_files => :query
     }
 
     request =
@@ -1401,7 +1536,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.SubmissionList},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1442,7 +1578,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplateFields},
       {409, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1461,6 +1598,8 @@ defmodule Docspring.Api.Client do
     - `:include_data` (boolean()): Include each submission's `data` (null without it).
     - `:limit` (integer()): How many items to return (1-100, default 50).
     - `:cursor` (String.t): The previous page's `next_cursor`, to get the next page. It's the ID of that page's last item, so get the next page before you delete or change the items on this one.
+    - `:state` (SubmissionState): Only list submissions in this state (one state per request). The ones that failed are `invalid_data`, `error`, `syntax_error`, `image_download_failed` and `image_processing_failed`, and one still `pending` an hour after it was created is stuck.
+    - `:include_files` (boolean()): Include each submission's generated files and their download links (`files`, empty without it), without the page images' links.
 
   ### Returns
 
@@ -1475,7 +1614,9 @@ defmodule Docspring.Api.Client do
       :created_before => :query,
       :include_data => :query,
       :limit => :query,
-      :cursor => :query
+      :cursor => :query,
+      :state => :query,
+      :include_files => :query
     }
 
     request =
@@ -1493,13 +1634,14 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.SubmissionList},
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
   @doc """
   List templates
-  Returns the templates in your account (their drafts), newest first, one page at a time. Get a template by its ID for its HTML, defaults and published versions. 
+  Returns the templates in your account (their drafts), newest first, one page at a time. Each one is a summary: get a template by its ID for its settings, its PDF in full, its HTML, defaults and published versions. 
 
   ### Parameters
 
@@ -1538,7 +1680,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.TemplateSummaryList},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1589,7 +1732,8 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.WebhookList},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1626,7 +1770,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Folder},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1663,7 +1808,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Template},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1701,7 +1847,8 @@ defmodule Docspring.Api.Client do
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
       {409, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1738,7 +1885,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplateFields},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1775,7 +1923,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Folder},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1812,7 +1961,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplateFields},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1850,7 +2000,8 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1882,7 +2033,8 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.AuthenticationCheck},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1920,7 +2072,8 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -1958,7 +2111,8 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -2002,7 +2156,9 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -2039,7 +2195,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.TemplateFields},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -2076,7 +2233,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Webhook},
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -2134,7 +2292,9 @@ defmodule Docspring.Api.Client do
       {201, Docspring.Model.Template},
       {422, Docspring.Model.ErrorResponse},
       {403, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -2179,7 +2339,9 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.Template},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse},
+      {504, Docspring.Model.ErrorResponse}
     ])
   end
 
@@ -2222,7 +2384,8 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.SubmissionValidation},
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
-      {401, Docspring.Model.ErrorResponse}
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
     ])
   end
 end

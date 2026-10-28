@@ -28,6 +28,7 @@ lib/docspring/model/create_signature_request_event_request.ex
 lib/docspring/model/create_signature_request_token_request.ex
 lib/docspring/model/create_submission_batch_request.ex
 lib/docspring/model/create_submission_request.ex
+lib/docspring/model/create_template_preview_request.ex
 lib/docspring/model/create_template_request.ex
 lib/docspring/model/create_webhook_request.ex
 lib/docspring/model/custom_file.ex
@@ -109,6 +110,7 @@ lib/docspring/model/submission_list.ex
 lib/docspring/model/submission_source.ex
 lib/docspring/model/submission_source_pdf.ex
 lib/docspring/model/submission_state.ex
+lib/docspring/model/submission_summary.ex
 lib/docspring/model/submission_validation.ex
 lib/docspring/model/template.ex
 lib/docspring/model/template_actor.ex
@@ -119,6 +121,7 @@ lib/docspring/model/template_diff.ex
 lib/docspring/model/template_diff_summary.ex
 lib/docspring/model/template_document.ex
 lib/docspring/model/template_document_state.ex
+lib/docspring/model/template_document_summary.ex
 lib/docspring/model/template_field_change.ex
 lib/docspring/model/template_field_changes.ex
 lib/docspring/model/template_field_dependency.ex
@@ -139,6 +142,8 @@ lib/docspring/model/template_page_fields_status.ex
 lib/docspring/model/template_page_image_status.ex
 lib/docspring/model/template_page_images.ex
 lib/docspring/model/template_page_processing_status.ex
+lib/docspring/model/template_preview.ex
+lib/docspring/model/template_preview_state.ex
 lib/docspring/model/template_source_pdf.ex
 lib/docspring/model/template_summary.ex
 lib/docspring/model/template_summary_list.ex
