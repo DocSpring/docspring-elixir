@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.UpdateTemplateDocumentRequest do
   @moduledoc """
-  The new PDF, as one of `cache_id`, `document_url` and `document_base64`.
+  The new PDF, or a Word template's new Word document, as one of `cache_id`, `document_url` and `document_base64`.
   """
 
   @derive JSON.Encoder

@@ -12,7 +12,7 @@ defmodule Docspring.Model.ModelCodeLanguage do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["typescript", "javascript", "ruby", "python", "php", "java", "csharp", "elixir", "go"]
+  def values, do: ["typescript", "javascript", "ruby", "python", "php", "java", "csharp", "elixir", "go", "rust"]
 
   def decode(value), do: value
 end

@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.GenerateFilesFormat do
   @moduledoc """
-  A format DocSpring can add to a processed submission: `png` (images of the PDF's pages).
+  A format DocSpring can add to a processed submission: `pdf`, `docx` or `odt` (a Word template's submission's PDF, Word document or OpenDocument file), or `png` (images of the PDF's pages).
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """
@@ -12,7 +12,7 @@ defmodule Docspring.Model.GenerateFilesFormat do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["png"]
+  def values, do: ["pdf", "docx", "odt", "png"]
 
   def decode(value), do: value
 end

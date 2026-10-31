@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.TemplateDocumentState do
   @moduledoc """
-  Where a template's PDF is in its processing.
+  Where a template's document is in its processing.
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """
@@ -12,7 +12,7 @@ defmodule Docspring.Model.TemplateDocumentState do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["pending", "processed", "password_required", "malformed_pdf", "unknown_error", "downloading", "download_failed"]
+  def values, do: ["pending", "processed", "password_required", "malformed_pdf", "unknown_error", "downloading", "download_failed", "converting", "conversion_failed"]
 
   def decode(value), do: value
 end

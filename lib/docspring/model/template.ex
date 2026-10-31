@@ -12,6 +12,7 @@ defmodule Docspring.Model.Template do
     :name,
     :description,
     :template_type,
+    :output_format,
     :ready,
     :document,
     :parent_folder_id,
@@ -65,6 +66,7 @@ defmodule Docspring.Model.Template do
     :name => String.t | nil,
     :description => String.t | nil,
     :template_type => Docspring.Model.TemplateType.t,
+    :output_format => Docspring.Model.OutputFormat.t,
     :ready => boolean(),
     :document => Docspring.Model.TemplateDocument.t | nil,
     :parent_folder_id => String.t | nil,
@@ -118,6 +120,7 @@ defmodule Docspring.Model.Template do
   def decode(value) do
     value
      |> Deserializer.deserialize(:template_type, :struct, Docspring.Model.TemplateType)
+     |> Deserializer.deserialize(:output_format, :struct, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:document, :struct, Docspring.Model.TemplateDocument)
      |> Deserializer.deserialize(:ai_field_naming_language, :struct, Docspring.Model.AiFieldNamingLanguage)
      |> Deserializer.deserialize(:default_form_mode, :struct, Docspring.Model.TemplateFormMode)

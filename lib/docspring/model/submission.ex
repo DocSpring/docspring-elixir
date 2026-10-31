@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.Submission do
   @moduledoc """
-  Data submitted to a template, and the PDF generated from it.
+  Data submitted to a template, and the files generated from it (a PDF, a Word document, an OpenDocument file, or more than one of them).
   """
 
   @derive JSON.Encoder

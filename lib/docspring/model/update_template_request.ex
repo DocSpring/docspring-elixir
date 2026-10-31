@@ -10,6 +10,7 @@ defmodule Docspring.Model.UpdateTemplateRequest do
   defstruct [
     :name,
     :description,
+    :output_format,
     :parent_folder_id,
     :locked,
     :add_signature_request_submission_id_footers,
@@ -49,6 +50,7 @@ defmodule Docspring.Model.UpdateTemplateRequest do
   @type t :: %__MODULE__{
     :name => String.t | nil,
     :description => String.t | nil,
+    :output_format => Docspring.Model.OutputFormat.t | nil,
     :parent_folder_id => String.t | nil,
     :locked => boolean() | nil,
     :add_signature_request_submission_id_footers => boolean() | nil,
@@ -89,6 +91,7 @@ defmodule Docspring.Model.UpdateTemplateRequest do
 
   def decode(value) do
     value
+     |> Deserializer.deserialize(:output_format, :struct, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:ai_field_naming_language, :struct, Docspring.Model.AiFieldNamingLanguage)
      |> Deserializer.deserialize(:default_form_mode, :struct, Docspring.Model.TemplateFormMode)
      |> Deserializer.deserialize(:expiration_interval, :struct, Docspring.Model.ExpirationInterval)

@@ -12,6 +12,7 @@ defmodule Docspring.Model.TemplateSummary do
     :name,
     :description,
     :template_type,
+    :output_format,
     :ready,
     :document,
     :parent_folder_id,
@@ -29,6 +30,7 @@ defmodule Docspring.Model.TemplateSummary do
     :name => String.t | nil,
     :description => String.t | nil,
     :template_type => Docspring.Model.TemplateType.t,
+    :output_format => Docspring.Model.OutputFormat.t,
     :ready => boolean(),
     :document => Docspring.Model.TemplateDocumentSummary.t | nil,
     :parent_folder_id => String.t | nil,
@@ -46,6 +48,7 @@ defmodule Docspring.Model.TemplateSummary do
   def decode(value) do
     value
      |> Deserializer.deserialize(:template_type, :struct, Docspring.Model.TemplateType)
+     |> Deserializer.deserialize(:output_format, :struct, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:document, :struct, Docspring.Model.TemplateDocumentSummary)
   end
 end

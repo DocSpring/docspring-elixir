@@ -11,6 +11,8 @@ defmodule Docspring.Model.SubmissionFiles do
     :pdf,
     :audit_trail,
     :preview,
+    :docx,
+    :odt,
     :png
   ]
 
@@ -18,6 +20,8 @@ defmodule Docspring.Model.SubmissionFiles do
     :pdf => Docspring.Model.GeneratedFile.t | nil,
     :audit_trail => Docspring.Model.GeneratedFile.t | nil,
     :preview => Docspring.Model.GeneratedFile.t | nil,
+    :docx => Docspring.Model.GeneratedFile.t | nil,
+    :odt => Docspring.Model.GeneratedFile.t | nil,
     :png => Docspring.Model.PageImages.t | nil
   }
 
@@ -28,6 +32,8 @@ defmodule Docspring.Model.SubmissionFiles do
      |> Deserializer.deserialize(:pdf, :struct, Docspring.Model.GeneratedFile)
      |> Deserializer.deserialize(:audit_trail, :struct, Docspring.Model.GeneratedFile)
      |> Deserializer.deserialize(:preview, :struct, Docspring.Model.GeneratedFile)
+     |> Deserializer.deserialize(:docx, :struct, Docspring.Model.GeneratedFile)
+     |> Deserializer.deserialize(:odt, :struct, Docspring.Model.GeneratedFile)
      |> Deserializer.deserialize(:png, :struct, Docspring.Model.PageImages)
   end
 end

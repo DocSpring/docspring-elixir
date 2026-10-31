@@ -1,7 +1,8 @@
 # DocSpring Elixir SDK
 
 The official Elixir client for the [DocSpring API](https://docspring.com/docs/api/). DocSpring fills PDF
-templates with your data, generates PDFs from HTML templates, combines PDFs and collects e-signatures.
+forms with your data, generates PDFs and Word documents from HTML and Word templates, combines PDFs and collects
+e-signatures.
 
 [Documentation](https://docspring.com/docs/) · [API reference](https://docspring.com/docs/api/) ·
 [Hex](https://hex.pm/packages/docspring) · [Changelog](https://github.com/DocSpring/docspring-elixir/blob/main/CHANGELOG.md)
@@ -9,7 +10,7 @@ templates with your data, generates PDFs from HTML templates, combines PDFs and 
 The code in this repository is generated from DocSpring's OpenAPI spec ([About this SDK](#about-this-sdk)). Issues and
 pull requests are welcome.
 
-Version 4.2.0. Requires Elixir ~> 1.18.
+Version 4.3.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -18,7 +19,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 4.2.0"}
+    {:docspring, "~> 4.3.0"}
   ]
 end
 ```
@@ -139,11 +140,11 @@ Elixir code for every method.
 | [`test_authentication`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#test_authentication/2) | Test authentication |
 | [`update_signature_request`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_signature_request/4) | Update a signature request |
 | [`update_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template/4) | Update a template |
-| [`update_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template_document/4) | Replace a template's PDF |
+| [`update_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template_document/4) | Replace a template's document |
 | [`update_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template_fields/4) | Update a template's fields |
 | [`update_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_webhook/4) | Update a webhook |
-| [`upload_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template/3) | Create a PDF template from an uploaded PDF |
-| [`upload_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template_document/4) | Replace a template's PDF with an uploaded PDF |
+| [`upload_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template/3) | Create a template from an uploaded PDF or Word document |
+| [`upload_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template_document/4) | Replace a template's document with an uploaded file |
 | [`validate_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#validate_submission/4) | Check a submission without creating it |
 
 ## Errors
@@ -161,7 +162,7 @@ existing code, such as removing or renaming a field, go in a new API version
 responses that are newer than it is:
 
 - The struct leaves out a response field added to the API after this release.
-- Enum values in responses are strings, so a value added to the API after this release comes back as it is: handle values you don't recognize.
+- An enum value added to the API after this release comes back as the API sent it: handle values you don't recognize.
 
 Upgrade the SDK to read new fields and enum values. The [changelog](https://github.com/DocSpring/docspring-elixir/blob/main/CHANGELOG.md) lists
 what each release adds.

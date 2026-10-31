@@ -90,5 +90,5 @@ keeps it.
 
 - List methods return `data` and `next_cursor`: pass `next_cursor` as `cursor` to get the next page.
 - Responses can be newer than this SDK, because DocSpring adds fields and enum values to API v2 without a new
-  version. The struct leaves out a response field added to the API after this release. Enum values in responses are strings, so a
-  value added after this release comes back as it is: handle values you don't recognize.
+  version. The struct leaves out a response field added to the API after this release. An enum value added after this release comes
+  back as the API sent it: handle values you don't recognize.

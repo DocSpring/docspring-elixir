@@ -106,7 +106,7 @@ defmodule Docspring.Connection do
         Keyword.get(
           tesla_options,
           :user_agent,
-          "docspring-elixir-4.2.0"
+          "docspring-elixir-4.3.0"
         )
       )
 

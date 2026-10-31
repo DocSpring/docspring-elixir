@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.TemplatePreview do
   @moduledoc """
-  PNG images of a template's pages filled in with data you send (not a PDF), to check how an HTML or PDF template prints with your data before you publish a version or send live data. A preview makes no submission and uses no credits. Its pages are watermarked like a test submission's PDF, and it's deleted an hour after it's created.
+  PNG images of a template's pages filled in with data you send (not a PDF), to check how an HTML, PDF or Word template prints with your data before you publish a version or send live data. A preview makes no submission and uses no credits. Its pages are watermarked like a test submission's PDF, and it's deleted an hour after it's created.
   """
 
   @derive JSON.Encoder

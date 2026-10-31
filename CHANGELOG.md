@@ -1,3 +1,30 @@
+### 4.3.0 [October 31, 2026]
+
+- New: get_template_model_code takes `rust` as its `lang`, for Rust structs that serde reads and writes.
+- New: Word templates (`template_type` `docx`). create_template makes one from a Word document (.docx, up to 50 MB)
+  that you upload and pass as a `cache_id`, or pass as a `document_url` or `document_base64`; upload_template takes the
+  file itself. update_template_document and upload_template_document replace its document the same ways. Each tag in
+  the document, such as `{{ customer.name }}`, becomes a field. Each of them takes an OpenDocument text file (.odt)
+  too, which DocSpring converts to a Word document.
+- New: a Word template's `output_format`, what its submissions make unless they set `output_formats`: `docx` (a Word
+  document), `odt` (an OpenDocument file) or `pdf`. create_template and upload_template require it, and
+  update_template changes it. A Word template that encrypts its PDFs makes PDFs, because Word documents and
+  OpenDocument files can't be password-protected.
+- New: the `docx` and `odt` output formats, a Word template's filled-in Word document (`files.docx`) and OpenDocument
+  file (`files.odt`, converted from the Word document). Add them to `output_formats` in create_submission or
+  create_submission_batch to get more than one file, such as the Word document and the PDF.
+- generate_submission_files takes `pdf`, the PDF of a Word template's submission that didn't make one (converted from
+  its Word document), `docx`, the Word document of one that made only its PDF (made again from its data and the
+  template version it used), and `odt`, its OpenDocument file. None of them uses credits again. Until the new file is
+  ready, its `state` in `files` is `pending`, and when it couldn't be made, its `error_message` says why.
+- A Word template's `document` is its Word document: `document.permanent_url` downloads it. Its `state` is `processed`
+  once it's uploaded or downloaded (`downloading` or `download_failed` while a `document_url` downloads, `converting`
+  or `conversion_failed` while an OpenDocument file is converted), and get_template_diff's `document_changed` says
+  whether it was edited.
+- get_template_page_images returns a 409 for a Word template, whose pages are only laid out when a document is made.
+- create_template_preview previews Word templates too: images of the pages of the PDF that the template's Word
+  document makes with your data. A DocSpring server that can't convert Word documents to PDF returns a 409.
+
 ### 4.2.0 [October 29, 2026]
 
 - **BREAKING CHANGE**: list_templates returns a shorter `TemplateSummary`: a template's name, description, type, folder

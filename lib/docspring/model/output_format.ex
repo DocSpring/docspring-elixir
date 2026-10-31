@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.OutputFormat do
   @moduledoc """
-  A file format DocSpring makes: `pdf`, or `png` (images of a PDF's pages).
+  A file format DocSpring makes: `pdf`, `docx` (a Word document), `odt` (an OpenDocument file), or `png` (images of a PDF's pages).
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """
@@ -12,7 +12,7 @@ defmodule Docspring.Model.OutputFormat do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["pdf", "png"]
+  def values, do: ["pdf", "docx", "odt", "png"]
 
   def decode(value), do: value
 end

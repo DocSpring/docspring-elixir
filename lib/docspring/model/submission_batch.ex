@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.SubmissionBatch do
   @moduledoc """
-  Submissions created together in one request. Their PDFs are only generated when every submission in the batch is valid.
+  Submissions created together in one request. Their files are only generated when every submission in the batch is valid.
   """
 
   @derive JSON.Encoder

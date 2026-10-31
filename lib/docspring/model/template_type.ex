@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.TemplateType do
   @moduledoc """
-  The kind of template: `pdf` (fields placed on an uploaded PDF) or `html` (a PDF rendered from HTML).
+  The kind of template: `pdf` (fields placed on an uploaded PDF), `html` (a PDF rendered from HTML) or `docx` (a Word document with tags where the data goes).
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """
@@ -12,7 +12,7 @@ defmodule Docspring.Model.TemplateType do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["pdf", "html"]
+  def values, do: ["pdf", "html", "docx"]
 
   def decode(value), do: value
 end

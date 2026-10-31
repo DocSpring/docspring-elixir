@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.GeneratedFile do
   @moduledoc """
-  A file that DocSpring generated, such as a submission's PDF. A file made after its submission was processed is listed while it's being made: check its `state` before using its links.
+  A file that DocSpring generated, such as a submission's PDF or Word document. A file made after its submission was processed is listed while it's being made: check its `state` before using its links.
   """
 
   @derive JSON.Encoder

@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.TemplateDocumentSummary do
   @moduledoc """
-  A PDF template's PDF, as template lists show it.
+  A PDF template's PDF or a Word template's Word document, as template lists show it.
   """
 
   @derive JSON.Encoder

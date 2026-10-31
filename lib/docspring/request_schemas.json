@@ -905,6 +905,8 @@
                 "type": "string",
                 "enum": [
                   "pdf",
+                  "docx",
+                  "odt",
                   "png"
                 ]
               }
@@ -1078,6 +1080,8 @@
                 "type": "string",
                 "enum": [
                   "pdf",
+                  "docx",
+                  "odt",
                   "png"
                 ]
               }
@@ -1113,6 +1117,8 @@
                       "type": "string",
                       "enum": [
                         "pdf",
+                        "docx",
+                        "odt",
                         "png"
                       ]
                     }
@@ -1184,7 +1190,16 @@
               "type": "string",
               "enum": [
                 "pdf",
-                "html"
+                "html",
+                "docx"
+              ]
+            },
+            "output_format": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "docx",
+                "odt"
               ]
             },
             "parent_folder_id": {
@@ -1950,6 +1965,9 @@
               "items": {
                 "type": "string",
                 "enum": [
+                  "pdf",
+                  "docx",
+                  "odt",
                   "png"
                 ]
               }
@@ -2023,7 +2041,8 @@
               "java",
               "csharp",
               "elixir",
-              "go"
+              "go",
+              "rust"
             ]
           }
         },
@@ -2640,6 +2659,14 @@
               "type": [
                 "string",
                 "null"
+              ]
+            },
+            "output_format": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "docx",
+                "odt"
               ]
             },
             "parent_folder_id": {
@@ -4059,6 +4086,14 @@
                 "ai",
                 "none"
               ]
+            },
+            "output_format": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "docx",
+                "odt"
+              ]
             }
           },
           "additionalProperties": false
@@ -4136,6 +4171,8 @@
                 "type": "string",
                 "enum": [
                   "pdf",
+                  "docx",
+                  "odt",
                   "png"
                 ]
               }
