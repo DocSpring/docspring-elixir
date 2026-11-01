@@ -29,6 +29,7 @@ defmodule Docspring.Model.Submission do
     :updated_at,
     :has_password,
     :signature_requests,
+    :signing_order,
     :actions,
     :truncated_text,
     :output_formats,
@@ -57,6 +58,7 @@ defmodule Docspring.Model.Submission do
     :updated_at => DateTime.t,
     :has_password => boolean(),
     :signature_requests => [Docspring.Model.SignatureRequest.t],
+    :signing_order => Docspring.Model.SigningOrder.t,
     :actions => [Docspring.Model.SubmissionAction.t],
     :truncated_text => %{optional(String.t) => [String.t]} | nil,
     :output_formats => [Docspring.Model.OutputFormat.t],
@@ -73,6 +75,7 @@ defmodule Docspring.Model.Submission do
      |> Deserializer.deserialize(:data_errors, :list, Docspring.Model.ErrorDetail)
      |> Deserializer.deserialize(:files, :struct, Docspring.Model.SubmissionFiles)
      |> Deserializer.deserialize(:signature_requests, :list, Docspring.Model.SignatureRequest)
+     |> Deserializer.deserialize(:signing_order, :struct, Docspring.Model.SigningOrder)
      |> Deserializer.deserialize(:actions, :list, Docspring.Model.SubmissionAction)
      |> Deserializer.deserialize(:output_formats, :list, Docspring.Model.OutputFormat)
   end

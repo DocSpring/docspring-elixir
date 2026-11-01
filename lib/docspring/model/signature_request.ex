@@ -16,6 +16,10 @@ defmodule Docspring.Model.SignatureRequest do
     :metadata,
     :role,
     :sort_order,
+    :send_email,
+    :signing_step,
+    :sent_at,
+    :email_status,
     :state,
     :data,
     :viewed_at,
@@ -44,6 +48,10 @@ defmodule Docspring.Model.SignatureRequest do
     :metadata => %{optional(String.t) => any()},
     :role => String.t,
     :sort_order => integer(),
+    :send_email => boolean(),
+    :signing_step => integer() | nil,
+    :sent_at => DateTime.t | nil,
+    :email_status => Docspring.Model.SignatureRequestEmailStatus.t | nil,
     :state => Docspring.Model.SignatureRequestState.t,
     :data => %{optional(String.t) => any()} | nil,
     :viewed_at => DateTime.t | nil,
@@ -67,6 +75,7 @@ defmodule Docspring.Model.SignatureRequest do
 
   def decode(value) do
     value
+     |> Deserializer.deserialize(:email_status, :struct, Docspring.Model.SignatureRequestEmailStatus)
      |> Deserializer.deserialize(:state, :struct, Docspring.Model.SignatureRequestState)
      |> Deserializer.deserialize(:auth_type, :struct, Docspring.Model.SignatureRequestAuthType)
      |> Deserializer.deserialize(:auth_second_factor_type, :struct, Docspring.Model.SignatureRequestAuthSecondFactorType)

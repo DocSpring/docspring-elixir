@@ -18,7 +18,16 @@ defmodule Docspring.Model.CreateSubmissionRequest do
     :field_overrides,
     :html,
     :css,
-    :signature_requests
+    :signature_requests,
+    :send_email,
+    :signing_order,
+    :email_subject,
+    :email_message,
+    :cc,
+    :reply_to,
+    :notification_emails,
+    :notify_when_signed,
+    :reminders
   ]
 
   @type t :: %__MODULE__{
@@ -32,7 +41,16 @@ defmodule Docspring.Model.CreateSubmissionRequest do
     :field_overrides => %{optional(String.t) => Docspring.Model.FieldOverride.t} | nil,
     :html => String.t | nil,
     :css => String.t | nil,
-    :signature_requests => [Docspring.Model.SignatureRequestInput.t] | nil
+    :signature_requests => [Docspring.Model.SignatureRequestInput.t] | nil,
+    :send_email => boolean() | nil,
+    :signing_order => Docspring.Model.SigningOrder.t | nil,
+    :email_subject => String.t | nil,
+    :email_message => String.t | nil,
+    :cc => [String.t] | nil,
+    :reply_to => String.t | nil,
+    :notification_emails => [String.t] | nil,
+    :notify_when_signed => boolean() | nil,
+    :reminders => Docspring.Model.SignatureRequestReminders.t | nil
   }
 
   alias Docspring.Deserializer
@@ -42,6 +60,8 @@ defmodule Docspring.Model.CreateSubmissionRequest do
      |> Deserializer.deserialize(:output_formats, :list, Docspring.Model.OutputFormat)
      |> Deserializer.deserialize(:field_overrides, :map, Docspring.Model.FieldOverride)
      |> Deserializer.deserialize(:signature_requests, :list, Docspring.Model.SignatureRequestInput)
+     |> Deserializer.deserialize(:signing_order, :struct, Docspring.Model.SigningOrder)
+     |> Deserializer.deserialize(:reminders, :struct, Docspring.Model.SignatureRequestReminders)
   end
 end
 

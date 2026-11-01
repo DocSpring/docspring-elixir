@@ -10,7 +10,7 @@ e-signatures.
 The code in this repository is generated from DocSpring's OpenAPI spec ([About this SDK](#about-this-sdk)). Issues and
 pull requests are welcome.
 
-Version 4.3.0. Requires Elixir ~> 1.18.
+Version 4.4.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -19,7 +19,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 4.3.0"}
+    {:docspring, "~> 4.4.0"}
   ]
 end
 ```
@@ -90,8 +90,11 @@ Elixir code for every method.
 | ------ | ----------- |
 | [`add_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#add_template_fields/4) | Add fields to a template |
 | [`copy_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#copy_template/3) | Copy a template |
+| [`create_account_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_account_email_action/3) | Create an account email action |
 | [`create_combined_pdf`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_combined_pdf/3) | Combine PDFs |
 | [`create_custom_file_from_upload`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_custom_file_from_upload/3) | Create a custom file from an upload |
+| [`create_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_email_action/4) | Create an email action |
+| [`create_email_domain`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_email_domain/3) | Add an email domain |
 | [`create_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_folder/3) | Create a folder |
 | [`create_signature_request_event`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_signature_request_event/4) | Record a signature request event |
 | [`create_signature_request_token`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_signature_request_token/3) | Create a signature request token |
@@ -100,7 +103,11 @@ Elixir code for every method.
 | [`create_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_template/3) | Create a template |
 | [`create_template_preview`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_template_preview/4) | Preview a template with data |
 | [`create_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_webhook/3) | Create a webhook |
+| [`delete_account_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_account_email_action/3) | Delete an account email action |
 | [`delete_custom_file`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_custom_file/3) | Delete a custom file |
+| [`delete_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_email_action/4) | Delete an email action |
+| [`delete_email_action_customization`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_email_action_customization/4) | Reset an account email action's customization |
+| [`delete_email_domain`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_email_domain/3) | Remove an email domain |
 | [`delete_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_folder/3) | Delete a folder |
 | [`delete_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_template/3) | Delete a template |
 | [`delete_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#delete_webhook/3) | Delete a webhook |
@@ -108,8 +115,11 @@ Elixir code for every method.
 | [`expire_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#expire_submission/3) | Expire a submission |
 | [`generate_submission_files`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#generate_submission_files/4) | Generate more files |
 | [`generate_submission_preview`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#generate_submission_preview/3) | Generate a preview PDF |
+| [`get_account_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_account_email_action/3) | Get an account email action |
 | [`get_combined_pdf`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_combined_pdf/3) | Get a combined PDF |
 | [`get_custom_file`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_custom_file/3) | Get a custom file |
+| [`get_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_email_action/4) | Get an email action |
+| [`get_email_domain`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_email_domain/3) | Get an email domain |
 | [`get_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_folder/3) | Get a folder |
 | [`get_presign_url`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_presign_url/2) | Get a presigned URL to upload a file |
 | [`get_signature_request`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_signature_request/3) | Get a signature request |
@@ -122,8 +132,11 @@ Elixir code for every method.
 | [`get_template_preview`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_preview/4) | Get a template preview |
 | [`get_template_schema`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_schema/3) | Get the JSON Schema of a template's submission data |
 | [`get_webhook`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_webhook/3) | Get a webhook |
+| [`list_account_email_actions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_account_email_actions/2) | List account email actions |
 | [`list_combined_pdfs`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_combined_pdfs/2) | List combined PDFs |
 | [`list_custom_files`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_custom_files/2) | List custom files |
+| [`list_email_actions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_email_actions/3) | List email actions |
+| [`list_email_domains`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_email_domains/2) | List email domains |
 | [`list_folders`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_folders/2) | List folders |
 | [`list_submissions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_submissions/2) | List submissions |
 | [`list_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_template_fields/3) | List a template's fields |
@@ -137,7 +150,12 @@ Elixir code for every method.
 | [`rename_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#rename_folder/4) | Rename a folder |
 | [`reorder_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#reorder_template_fields/4) | Reorder a template's fields |
 | [`restore_template_version`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#restore_template_version/4) | Restore a template version |
+| [`send_account_email_action_test_email`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#send_account_email_action_test_email/3) | Send a test email for an account email action |
+| [`send_email_action_test_email`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#send_email_action_test_email/4) | Send a test email |
 | [`test_authentication`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#test_authentication/2) | Test authentication |
+| [`update_account_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_account_email_action/4) | Update an account email action |
+| [`update_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_email_action/5) | Update an email action |
+| [`update_email_action_customization`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_email_action_customization/5) | Customize an account email action for a template |
 | [`update_signature_request`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_signature_request/4) | Update a signature request |
 | [`update_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template/4) | Update a template |
 | [`update_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_template_document/4) | Replace a template's document |
@@ -146,6 +164,7 @@ Elixir code for every method.
 | [`upload_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template/3) | Create a template from an uploaded PDF or Word document |
 | [`upload_template_document`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#upload_template_document/4) | Replace a template's document with an uploaded file |
 | [`validate_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#validate_submission/4) | Check a submission without creating it |
+| [`verify_email_domain`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#verify_email_domain/3) | Verify an email domain |
 
 ## Errors
 

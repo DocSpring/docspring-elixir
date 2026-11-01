@@ -11,7 +11,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Add fields to a template
-  Adds fields to a template's draft and returns all of its fields. Publish a version for submissions of published versions to have them. 
+  Adds fields to a template's draft and returns all of its fields. Publish a version for submissions of published versions to have them. A field with the name of one of the template's fields shares its settings (`type`, `required`, `default`, ...), so a field that sets one to another value is refused: PUT /templates/{template_id}/fields changes them for every field with the name. 
 
   ### Parameters
 
@@ -19,6 +19,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (AddTemplateFieldsRequest): The fields to add to the template's draft.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -26,12 +27,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec add_template_fields(Tesla.Env.client, String.t, Docspring.Model.AddTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def add_template_fields(connection, template_id, body, _opts \\ []) do
+  def add_template_fields(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/fields")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "addTemplateFields")
       |> Enum.into([])
@@ -58,6 +64,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
     - `:body` (CopyTemplateRequest): Settings for the copy.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -67,7 +74,8 @@ defmodule Docspring.Api.Client do
   @spec copy_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def copy_template(connection, template_id, opts \\ []) do
     optional_params = %{
-      :body => :body
+      :body => :body,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -93,6 +101,49 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Create an account email action
+  Adds an email action to your account. It sends for every template, or only for the templates in `template_ids` and the templates in the folders in `folder_ids` (and the folders inside them). Each template can turn it off or change its settings for that template only (`PUT /templates/{template_id}/email_actions/{email_action_id}/customization`). Without a paid plan (Starter or higher), email actions only email your team: test submissions' emails go to your account's users, and live submissions' emails aren't sent. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `body` (CreateAccountEmailActionRequest): The account email action to create. Properties left out get their defaults, and it sends for every template unless it lists `template_ids` or `folder_ids`.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec create_account_email_action(Tesla.Env.client, Docspring.Model.CreateAccountEmailActionRequest.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def create_account_email_action(connection, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/email_actions")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "createAccountEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.EmailAction},
+      {422, Docspring.Model.ErrorResponse},
+      {403, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Combine PDFs
   Merges PDFs into one: submissions, other combined PDFs, templates, custom files (POST /custom_files) and PDFs from URLs, in the order of `source_pdfs`. The PDF is generated in the background: on sync.api hosts the request waits for it (unless you pass `wait=false`), otherwise poll GET /combined_pdfs/{combined_pdf_id} until `state` isn't `pending`.  A template source merges the template's processed PDF by default: the PDF submissions are filled in on, decrypted and with its form fields removed. Pass `processed: false` to merge the PDF as it was uploaded. 
 
@@ -102,7 +153,7 @@ defmodule Docspring.Api.Client do
   - `body` (CreateCombinedPdfRequest): The PDFs to merge, and the combined PDF's settings.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until the PDF has been generated before responding. Default true on sync.api hosts.
-    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of creating another combined PDF. Send a new key with each new combined PDF, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` means the first request is still being processed: send the request again in a few seconds.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -149,6 +200,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `body` (CreateCustomFileFromUploadRequest): The uploaded file to create the custom file from.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -156,12 +208,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec create_custom_file_from_upload(Tesla.Env.client, Docspring.Model.CreateCustomFileFromUploadRequest.t, keyword()) :: {:ok, Docspring.Model.CustomFile.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def create_custom_file_from_upload(connection, body, _opts \\ []) do
+  def create_custom_file_from_upload(connection, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/custom_files")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "createCustomFileFromUpload")
       |> Enum.into([])
@@ -177,6 +234,94 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Create an email action
+  Adds an email action to a template's draft. From then on, each processed submission emails its PDF to the recipients in `to`, `cc` and `bcc`: addresses, and tags for the address in one of the submission's fields (`{{ data.tenant_email }}`) or in its metadata (`{{ metadata.agent_email }}`). With `send_when`, only the submissions whose values meet its conditions send one. Without a paid plan (Starter or higher), email actions only email your team: test submissions' emails go to your account's users, and live submissions' emails aren't sent. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `body` (CreateEmailActionRequest): The email action to create. Properties left out get their defaults.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec create_email_action(Tesla.Env.client, String.t, Docspring.Model.CreateEmailActionRequest.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def create_email_action(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/email_actions")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "createEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.EmailAction},
+      {422, Docspring.Model.ErrorResponse},
+      {403, Docspring.Model.ErrorResponse},
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Add an email domain
+  Adds a domain for email actions to send from, and returns the DNS records to add to it. DocSpring checks for them every few minutes, and the domain is verified once its DKIM and DMARC records are found. Needs a paid monthly plan. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `body` (CreateEmailDomainRequest): The domain to add.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec create_email_domain(Tesla.Env.client, Docspring.Model.CreateEmailDomainRequest.t, keyword()) :: {:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def create_email_domain(connection, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/email_domains")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "createEmailDomain")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {201, Docspring.Model.EmailDomain},
+      {422, Docspring.Model.ErrorResponse},
+      {403, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Create a folder
   Creates a folder for organizing templates. Pass `parent_folder_id` to create it inside another folder. Folder names are unique within their parent folder. 
 
@@ -185,6 +330,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `body` (CreateFolderRequest): The folder to create.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -192,12 +338,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec create_folder(Tesla.Env.client, Docspring.Model.CreateFolderRequest.t, keyword()) :: {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def create_folder(connection, body, _opts \\ []) do
+  def create_folder(connection, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/folders")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "createFolder")
       |> Enum.into([])
@@ -222,6 +373,7 @@ defmodule Docspring.Api.Client do
   - `signature_request_id` (String.t): The signature request's ID.
   - `body` (CreateSignatureRequestEventRequest): The event to record.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -229,12 +381,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec create_signature_request_event(Tesla.Env.client, String.t, Docspring.Model.CreateSignatureRequestEventRequest.t, keyword()) :: {:ok, Docspring.Model.SignatureRequestEvent.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def create_signature_request_event(connection, signature_request_id, body, _opts \\ []) do
+  def create_signature_request_event(connection, signature_request_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/signature_requests/#{signature_request_id}/events")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "createSignatureRequestEvent")
       |> Enum.into([])
@@ -262,6 +419,7 @@ defmodule Docspring.Api.Client do
   - `signature_request_id` (String.t): The signature request's ID.
   - `opts` (keyword): Optional parameters
     - `:body` (CreateSignatureRequestTokenRequest): The kind of link to make. Send no body for an `api` token.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -271,7 +429,8 @@ defmodule Docspring.Api.Client do
   @spec create_signature_request_token(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.SignatureRequestToken.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def create_signature_request_token(connection, signature_request_id, opts \\ []) do
     optional_params = %{
-      :body => :body
+      :body => :body,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -299,7 +458,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Generate a PDF
-  Creates a submission: fills in a template with your data and generates a PDF. The PDF is generated in the background: on sync.api hosts the request waits for it (unless you pass `wait=false`), otherwise poll GET /submissions/{submission_id} until `state` isn't `pending`.  Data that doesn't match the template's fields returns a 422 with an `invalid_data` error. The submission is still saved, with its errors, so you can find it in DocSpring: the error's `submission_id` is its ID. 
+  Creates a submission: fills in a template with your data and generates a PDF. The PDF is generated in the background: on sync.api hosts the request waits for it (unless you pass `wait=false`), otherwise poll GET /submissions/{submission_id} until `state` isn't `pending`.  Data that doesn't match the template's fields returns a 422 with an `invalid_data` error. The submission is still saved, with its errors, so you can find it in DocSpring: the error's `submission_id` is its ID.  With `signature_requests`, the PDF is generated once everyone has signed. DocSpring emails each signer a link to sign, unless `send_email` is false, and can send reminders and the completed document. 
 
   ### Parameters
 
@@ -307,9 +466,9 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (CreateSubmissionRequest): The submission's data and settings.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published).
+    - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `latest`.
     - `:wait` (boolean()): Wait until the files have been generated before responding. Default true on sync.api hosts.
-    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of creating another submission. Send a new key with each new submission, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` means the first request is still being processed: send the request again in a few seconds.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -359,7 +518,7 @@ defmodule Docspring.Api.Client do
   - `body` (CreateSubmissionBatchRequest): The submissions to create, and the settings they share.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until every file in the batch has been generated before responding. Default true on sync.api hosts.
-    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of creating another batch. Send a new key with each new batch, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` means the first request is still being processed: send the request again in a few seconds.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -399,7 +558,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Create a template
-  Creates an HTML template, or a PDF or Word template from a file you uploaded with the presigned upload (GET /uploads/presign): pass its `fields.key` as `cache_id`. You can send a link to the file (`document_url`) or the file in base64 (`document_base64`) instead, or send the file with the request with POST /templates/upload. A Word template is made from a Word document (.docx) or an OpenDocument text file (.odt), which DocSpring converts to a Word document. It needs its `output_format`: what each submission makes, a Word document (`docx`), an OpenDocument file (`odt`) or a PDF.  A PDF template is ready to generate PDFs once DocSpring has processed its PDF, a template created from a `document_url` once its document has been downloaded, and one created from an .odt once it has been converted (`ready` is true). On sync.api hosts the request waits for that unless you pass `wait=false`. 
+  Creates an HTML template, or a PDF or Word template from a file you uploaded with the presigned upload (GET /uploads/presign): pass its `fields.key` as `cache_id`. You can send a link to the file (`document_url`) or the file in base64 (`document_base64`) instead, or send the file with the request with POST /templates/upload. A Word template is made from a Word document (.docx) or an OpenDocument text file (.odt), which DocSpring converts to a Word document. It needs its `output_format`: what each submission makes, a Word document (`docx`), an OpenDocument file (`odt`) or a PDF. A page design (`page_designer`) takes its `layout` in the Page Designer layout format, or starts with an empty page without one.  A PDF template is ready to generate PDFs once DocSpring has processed its PDF, a template created from a `document_url` once its document has been downloaded, and one created from an .odt once it has been converted (`ready` is true). On sync.api hosts the request waits for that unless you pass `wait=false`. 
 
   ### Parameters
 
@@ -407,6 +566,7 @@ defmodule Docspring.Api.Client do
   - `body` (CreateTemplateRequest): The template to create.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until the PDF has been processed, a `document_url`'s PDF or Word document downloaded, and an OpenDocument file converted, before responding. Default true on sync.api hosts.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -416,7 +576,8 @@ defmodule Docspring.Api.Client do
   @spec create_template(Tesla.Env.client, Docspring.Model.CreateTemplateRequest.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def create_template(connection, body, opts \\ []) do
     optional_params = %{
-      :wait => :query
+      :wait => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -443,7 +604,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Preview a template with data
-  Makes PNG images of a template's pages filled in with the data you send (not a PDF), so you can check how an HTML, PDF or Word template prints with your data before you publish a version or send live data. A Word template's pages are its PDF's, whatever its `output_format`. It renders the template's draft, or the published `version` you ask for. A preview makes no submission and uses no credits, and its pages are watermarked like a test submission's PDF. It's `pending` while it renders: get it with GET /templates/{template_id}/previews/{preview_id} until it's `processed`, with an image of each page, or `error`. 
+  Makes PNG images of a template's pages filled in with the data you send (not a PDF), so you can check how an HTML, PDF or Word template or a page design prints with your data before you publish a version or send live data. A Word template's pages are its PDF's, whatever its `output_format`. It renders the template's draft, or the published `version` you ask for. A preview makes no submission and uses no credits, and its pages are watermarked like a test submission's PDF. It's `pending` while it renders: get it with GET /templates/{template_id}/previews/{preview_id} until it's `processed`, with an image of each page, or `error`. 
 
   ### Parameters
 
@@ -451,7 +612,8 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (CreateTemplatePreviewRequest): The data to render the template with.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `draft`.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -461,7 +623,8 @@ defmodule Docspring.Api.Client do
   @spec create_template_preview(Tesla.Env.client, String.t, Docspring.Model.CreateTemplatePreviewRequest.t, keyword()) :: {:ok, Docspring.Model.TemplatePreview.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def create_template_preview(connection, template_id, body, opts \\ []) do
     optional_params = %{
-      :version => :query
+      :version => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -493,6 +656,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `body` (CreateWebhookRequest): The webhook to create.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -500,12 +664,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec create_webhook(Tesla.Env.client, Docspring.Model.CreateWebhookRequest.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def create_webhook(connection, body, _opts \\ []) do
+  def create_webhook(connection, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/webhooks")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "createWebhook")
       |> Enum.into([])
@@ -522,6 +691,46 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Delete an account email action
+  Deletes one of your account's email actions, with every template's customization of it. Emails it has already queued for submissions aren't sent. Submissions keep the record of the emails it sent. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_action_id` (String.t): The account email action's ID.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec delete_account_email_action(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def delete_account_email_action(connection, email_action_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:delete)
+      |> url("/email_actions/#{email_action_id}")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "deleteAccountEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Delete a custom file
   Deletes a custom file and returns it. Use a live API token: test tokens can't delete custom files. 
 
@@ -530,6 +739,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `custom_file_id` (String.t): The custom file's ID.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -537,11 +747,16 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec delete_custom_file(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.CustomFile.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def delete_custom_file(connection, custom_file_id, _opts \\ []) do
+  def delete_custom_file(connection, custom_file_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:delete)
       |> url("/custom_files/#{custom_file_id}")
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "deleteCustomFile")
       |> Enum.into([])
@@ -558,6 +773,130 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Delete an email action
+  Deletes an email action. Emails it has already queued for submissions aren't sent. Submissions keep the record of the emails it sent. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `email_action_id` (String.t): The email action's ID.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec delete_email_action(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def delete_email_action(connection, template_id, email_action_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:delete)
+      |> url("/templates/#{template_id}/email_actions/#{email_action_id}")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "deleteEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Reset an account email action's customization
+  Removes the template's changes to one of your account's email actions: it sends for this template as it is, and again if the template had turned it off. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `email_action_id` (String.t): The ID of one of your account's email actions that sends for the template.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec delete_email_action_customization(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def delete_email_action_customization(connection, template_id, email_action_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:delete)
+      |> url("/templates/#{template_id}/email_actions/#{email_action_id}/customization")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "deleteEmailActionCustomization")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Remove an email domain
+  Removes an email domain. Email actions that send from an address at it fail until you add and verify it again, or change their `from_address`. You can then remove its DNS records. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_domain_id` (String.t): The email domain's ID.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec delete_email_domain(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def delete_email_domain(connection, email_domain_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:delete)
+      |> url("/email_domains/#{email_domain_id}")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "deleteEmailDomain")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailDomain},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Delete a folder
   Deletes an empty folder and returns it. A folder that still has templates or folders in it can't be deleted. 
 
@@ -566,6 +905,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `folder_id` (String.t): The folder's ID.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -573,11 +913,16 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec delete_folder(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def delete_folder(connection, folder_id, _opts \\ []) do
+  def delete_folder(connection, folder_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:delete)
       |> url("/folders/#{folder_id}")
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "deleteFolder")
       |> Enum.into([])
@@ -603,6 +948,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
     - `:version` (String.t): Delete only this published version (`1.2.0`) or the draft (`draft`, when no version has been published). Without it, the draft and every published version are deleted.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -612,7 +958,8 @@ defmodule Docspring.Api.Client do
   @spec delete_template(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def delete_template(connection, template_id, opts \\ []) do
     optional_params = %{
-      :version => :query
+      :version => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -645,6 +992,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `webhook_id` (String.t): The webhook's ID.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -652,11 +1000,16 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec delete_webhook(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def delete_webhook(connection, webhook_id, _opts \\ []) do
+  def delete_webhook(connection, webhook_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:delete)
       |> url("/webhooks/#{webhook_id}")
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "deleteWebhook")
       |> Enum.into([])
@@ -680,6 +1033,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `combined_pdf_id` (String.t): The combined PDF's ID.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -687,11 +1041,16 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec expire_combined_pdf(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.CombinedPdf.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def expire_combined_pdf(connection, combined_pdf_id, _opts \\ []) do
+  def expire_combined_pdf(connection, combined_pdf_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:delete)
       |> url("/combined_pdfs/#{combined_pdf_id}")
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "expireCombinedPdf")
       |> Enum.into([])
@@ -716,6 +1075,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `submission_id` (String.t): The submission's ID.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -723,11 +1083,16 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec expire_submission(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def expire_submission(connection, submission_id, _opts \\ []) do
+  def expire_submission(connection, submission_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:delete)
       |> url("/submissions/#{submission_id}")
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "expireSubmission")
       |> Enum.into([])
@@ -754,6 +1119,7 @@ defmodule Docspring.Api.Client do
   - `body` (GenerateSubmissionFilesRequest): The formats to make.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until the files have been generated before responding. Default true on sync.api hosts.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -763,7 +1129,8 @@ defmodule Docspring.Api.Client do
   @spec generate_submission_files(Tesla.Env.client, String.t, Docspring.Model.GenerateSubmissionFilesRequest.t, keyword()) :: {:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def generate_submission_files(connection, submission_id, body, opts \\ []) do
     optional_params = %{
-      :wait => :query
+      :wait => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -798,6 +1165,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `submission_id` (String.t): The submission's ID.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -805,11 +1173,16 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec generate_submission_preview(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.Submission.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def generate_submission_preview(connection, submission_id, _opts \\ []) do
+  def generate_submission_preview(connection, submission_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/submissions/#{submission_id}/generate_preview")
+      |> add_optional_params(optional_params, opts)
       |> ensure_body()
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "generateSubmissionPreview")
@@ -820,6 +1193,41 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Submission},
       {409, Docspring.Model.ErrorResponse},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get an account email action
+  Returns one of your account's email actions, with its settings and whether its emails are failing.
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_action_id` (String.t): The account email action's ID.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_account_email_action(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_account_email_action(connection, email_action_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/email_actions/#{email_action_id}")
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "getAccountEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse},
       {429, Docspring.Model.ErrorResponse}
@@ -890,6 +1298,77 @@ defmodule Docspring.Api.Client do
     |> Connection.request(request)
     |> evaluate_response([
       {200, Docspring.Model.CustomFile},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get an email action
+  Returns one of a template's email actions, with its settings and whether its emails are failing.
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `email_action_id` (String.t): The email action's ID.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_email_action(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_email_action(connection, template_id, email_action_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/email_actions/#{email_action_id}")
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "getEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Get an email domain
+  Returns an email domain, whether it's verified, and the DNS records to add to it.
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_domain_id` (String.t): The email domain's ID.
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_email_domain(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def get_email_domain(connection, email_domain_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/email_domains/#{email_domain_id}")
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "getEmailDomain")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailDomain},
       {404, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse},
       {429, Docspring.Model.ErrorResponse}
@@ -1084,7 +1563,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `draft`.
 
   ### Returns
 
@@ -1126,7 +1605,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `draft`.
 
   ### Returns
 
@@ -1169,7 +1648,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `lang` (ModelCodeLanguage): The language to generate the code in.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): The template version: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published), the version a submission uses by default.
+    - `:version` (String.t): The template version: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `latest`, the version a submission uses by default.
     - `:just_types` (boolean()): Return only the types (interfaces, classes or structs), without the code that converts JSON to and from them. Default false. JavaScript has no types, PHP has no types-only code, and Rust's code is only types (serde converts the JSON), so theirs is the same either way.
 
   ### Returns
@@ -1214,7 +1693,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `draft`.
 
   ### Returns
 
@@ -1291,7 +1770,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): The template version: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published), the version a submission uses by default.
+    - `:version` (String.t): The template version: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `latest`, the version a submission uses by default.
 
   ### Returns
 
@@ -1353,6 +1832,47 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.Webhook},
       {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  List account email actions
+  Returns your account's email actions, newest first, one page at a time. Each one emails the files of every template's processed submissions, or of the templates and folders it lists. A template's own email actions are listed with the template (`GET /templates/{template_id}/email_actions`). 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `opts` (keyword): Optional parameters
+    - `:limit` (integer()): How many items to return (1-100, default 50).
+    - `:cursor` (String.t): The previous page's `next_cursor`, to get the next page. It's the ID of that page's last item, so get the next page before you delete or change the items on this one.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailActionList.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec list_account_email_actions(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.EmailActionList.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def list_account_email_actions(connection, opts \\ []) do
+    optional_params = %{
+      :limit => :query,
+      :cursor => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/email_actions")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "listAccountEmailActions")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailActionList},
       {401, Docspring.Model.ErrorResponse},
       {429, Docspring.Model.ErrorResponse}
     ])
@@ -1437,6 +1957,90 @@ defmodule Docspring.Api.Client do
     |> evaluate_response([
       {200, Docspring.Model.CustomFileList},
       {422, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  List email actions
+  Returns the email actions of a template's draft, and your account's email actions that send for it, newest first, one page at a time. Each one emails every processed submission's files to the people it lists. An account email action (`template_id` null) shows the settings it sends for this template, with the template's changes in `customization`. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `opts` (keyword): Optional parameters
+    - `:limit` (integer()): How many items to return (1-100, default 50).
+    - `:cursor` (String.t): The previous page's `next_cursor`, to get the next page. It's the ID of that page's last item, so get the next page before you delete or change the items on this one.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailActionList.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec list_email_actions(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailActionList.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def list_email_actions(connection, template_id, opts \\ []) do
+    optional_params = %{
+      :limit => :query,
+      :cursor => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/templates/#{template_id}/email_actions")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "listEmailActions")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailActionList},
+      {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  List email domains
+  Returns the domains in your account that email actions can send from once they're verified, newest first, one page at a time. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `opts` (keyword): Optional parameters
+    - `:limit` (integer()): How many items to return (1-100, default 50).
+    - `:cursor` (String.t): The previous page's `next_cursor`, to get the next page. It's the ID of that page's last item, so get the next page before you delete or change the items on this one.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailDomainList.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec list_email_domains(Tesla.Env.client, keyword()) :: {:ok, Docspring.Model.EmailDomainList.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def list_email_domains(connection, opts \\ []) do
+    optional_params = %{
+      :limit => :query,
+      :cursor => :query
+    }
+
+    request =
+      %{}
+      |> method(:get)
+      |> url("/email_domains")
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "listEmailDomains")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailDomainList},
       {401, Docspring.Model.ErrorResponse},
       {429, Docspring.Model.ErrorResponse}
     ])
@@ -1551,7 +2155,7 @@ defmodule Docspring.Api.Client do
   - `connection` (Docspring.Connection): Connection to server
   - `template_id` (String.t): The template's ID.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `draft`.
+    - `:version` (String.t): A published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `draft`.
 
   ### Returns
 
@@ -1648,7 +2252,7 @@ defmodule Docspring.Api.Client do
 
   - `connection` (Docspring.Connection): Connection to server
   - `opts` (keyword): Optional parameters
-    - `:query` (String.t): Only list templates whose name contains this text (ignoring case).
+    - `:query` (String.t): Only list templates whose name contains this text (ignoring case). `%` and `_` match themselves.
     - `:parent_folder_id` (String.t): Only list the templates in this folder (not in its subfolders).
     - `:limit` (integer()): How many items to return (1-100, default 50).
     - `:cursor` (String.t): The previous page's `next_cursor`, to get the next page. It's the ID of that page's last item, so get the next page before you delete or change the items on this one.
@@ -1748,6 +2352,7 @@ defmodule Docspring.Api.Client do
   - `folder_id` (String.t): The folder's ID.
   - `body` (MoveFolderRequest): Where to move the folder.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1755,12 +2360,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec move_folder(Tesla.Env.client, String.t, Docspring.Model.MoveFolderRequest.t, keyword()) :: {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def move_folder(connection, folder_id, body, _opts \\ []) do
+  def move_folder(connection, folder_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/folders/#{folder_id}/move")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "moveFolder")
       |> Enum.into([])
@@ -1786,6 +2396,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (MoveTemplateRequest): Where to move the template.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1793,12 +2404,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec move_template(Tesla.Env.client, String.t, Docspring.Model.MoveTemplateRequest.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def move_template(connection, template_id, body, _opts \\ []) do
+  def move_template(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/move")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "moveTemplate")
       |> Enum.into([])
@@ -1824,6 +2440,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (PublishTemplateVersionRequest): The version to publish.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1831,12 +2448,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec publish_template_version(Tesla.Env.client, String.t, Docspring.Model.PublishTemplateVersionRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateVersion.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def publish_template_version(connection, template_id, body, _opts \\ []) do
+  def publish_template_version(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/publish_version")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "publishTemplateVersion")
       |> Enum.into([])
@@ -1863,6 +2485,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (RemoveTemplateFieldsRequest): The fields to remove from the template's draft.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1870,12 +2493,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec remove_template_fields(Tesla.Env.client, String.t, Docspring.Model.RemoveTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def remove_template_fields(connection, template_id, body, _opts \\ []) do
+  def remove_template_fields(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/fields/remove")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "removeTemplateFields")
       |> Enum.into([])
@@ -1901,6 +2529,7 @@ defmodule Docspring.Api.Client do
   - `folder_id` (String.t): The folder's ID.
   - `body` (RenameFolderRequest): The folder's new name.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1908,12 +2537,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec rename_folder(Tesla.Env.client, String.t, Docspring.Model.RenameFolderRequest.t, keyword()) :: {:ok, Docspring.Model.Folder.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def rename_folder(connection, folder_id, body, _opts \\ []) do
+  def rename_folder(connection, folder_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/folders/#{folder_id}/rename")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "renameFolder")
       |> Enum.into([])
@@ -1939,6 +2573,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (ReorderTemplateFieldsRequest): The new order of the fields in the template's draft.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1946,12 +2581,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec reorder_template_fields(Tesla.Env.client, String.t, Docspring.Model.ReorderTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def reorder_template_fields(connection, template_id, body, _opts \\ []) do
+  def reorder_template_fields(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/fields/reorder")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "reorderTemplateFields")
       |> Enum.into([])
@@ -1977,6 +2617,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (RestoreTemplateVersionRequest): The version to restore.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -1984,12 +2625,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec restore_template_version(Tesla.Env.client, String.t, Docspring.Model.RestoreTemplateVersionRequest.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def restore_template_version(connection, template_id, body, _opts \\ []) do
+  def restore_template_version(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:post)
       |> url("/templates/#{template_id}/restore_version")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "restoreTemplateVersion")
       |> Enum.into([])
@@ -2001,6 +2647,95 @@ defmodule Docspring.Api.Client do
       {409, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
       {404, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Send a test email for an account email action
+  Sends the account email action's email to the API token's user only, as it would go for one template it sends for, with each field shown as its name in brackets, so you can check how it looks. When the email action attaches its files and that template is a PDF template, the test attaches the template's blank PDF. It isn't recorded on any submission. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_action_id` (String.t): The account email action's ID.
+  - `opts` (keyword): Optional parameters
+    - `:body` (SendAccountEmailActionTestEmailRequest): Which template the test email is for.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailActionTestEmail.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec send_account_email_action_test_email(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailActionTestEmail.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def send_account_email_action_test_email(connection, email_action_id, opts \\ []) do
+    optional_params = %{
+      :body => :body,
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/email_actions/#{email_action_id}/test_email")
+      |> add_optional_params(optional_params, opts)
+      |> ensure_body()
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "sendAccountEmailActionTestEmail")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailActionTestEmail},
+      {422, Docspring.Model.ErrorResponse},
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Send a test email
+  Sends the email action's email to the API token's user only, with each field and metadata value shown as its name in brackets, so you can check how it looks. When the email action attaches its files and the template is a PDF template, the test attaches the template's blank PDF. It isn't recorded on any submission. Without a paid plan, the user needs a confirmed email address. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `email_action_id` (String.t): The email action's ID.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailActionTestEmail.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec send_email_action_test_email(Tesla.Env.client, String.t, String.t, keyword()) :: {:ok, Docspring.Model.EmailActionTestEmail.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def send_email_action_test_email(connection, template_id, email_action_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/templates/#{template_id}/email_actions/#{email_action_id}/test_email")
+      |> add_optional_params(optional_params, opts)
+      |> ensure_body()
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "sendEmailActionTestEmail")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailActionTestEmail},
+      {409, Docspring.Model.ErrorResponse},
+      {403, Docspring.Model.ErrorResponse},
       {401, Docspring.Model.ErrorResponse},
       {429, Docspring.Model.ErrorResponse}
     ])
@@ -2040,6 +2775,138 @@ defmodule Docspring.Api.Client do
   end
 
   @doc """
+  Update an account email action
+  Changes one of your account's email actions. Properties left out keep their values. Its templates' customizations keep their own changes, and follow the rest. Set `enabled` to false to stop its emails for every template. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_action_id` (String.t): The account email action's ID.
+  - `body` (UpdateAccountEmailActionRequest): The settings to change. Properties left out keep their values.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec update_account_email_action(Tesla.Env.client, String.t, Docspring.Model.UpdateAccountEmailActionRequest.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def update_account_email_action(connection, email_action_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:put)
+      |> url("/email_actions/#{email_action_id}")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "updateAccountEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Update an email action
+  Changes an email action's settings. Properties left out keep their values. Set `enabled` to false to stop its emails, or to true to turn it back on after DocSpring turned it off. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `email_action_id` (String.t): The email action's ID.
+  - `body` (UpdateEmailActionRequest): The settings to change. Properties left out keep their values.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec update_email_action(Tesla.Env.client, String.t, String.t, Docspring.Model.UpdateEmailActionRequest.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def update_email_action(connection, template_id, email_action_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:put)
+      |> url("/templates/#{template_id}/email_actions/#{email_action_id}")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "updateEmailAction")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {422, Docspring.Model.ErrorResponse},
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Customize an account email action for a template
+  Changes one of your account's email actions for this template only, replacing any changes the template had. Each setting you send is changed for this template, and the ones you leave out follow the account email action, including later changes to it. Set `enabled` to false to stop it sending for this template. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `template_id` (String.t): The template's ID.
+  - `email_action_id` (String.t): The ID of one of your account's email actions that sends for the template.
+  - `body` (UpdateEmailActionCustomizationRequest): The template's changes to the account email action, replacing any it had. Each setting you send is changed for this template, and the ones you leave out follow the account email action. `enabled: false` stops it sending for this template; left out, it sends.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec update_email_action_customization(Tesla.Env.client, String.t, String.t, Docspring.Model.UpdateEmailActionCustomizationRequest.t, keyword()) :: {:ok, Docspring.Model.EmailAction.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def update_email_action_customization(connection, template_id, email_action_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:put)
+      |> url("/templates/#{template_id}/email_actions/#{email_action_id}/customization")
+      |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "updateEmailActionCustomization")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailAction},
+      {422, Docspring.Model.ErrorResponse},
+      {409, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
   Update a signature request
   Changes a pending signature request's metadata, or how your app authenticated the person (for the audit trail). Once the person has opened it, only its metadata can be changed, and a completed or declined signature request can't be changed. 
 
@@ -2049,6 +2916,7 @@ defmodule Docspring.Api.Client do
   - `signature_request_id` (String.t): The signature request's ID.
   - `body` (UpdateSignatureRequestRequest): The settings to change. Properties left out keep their values.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2056,12 +2924,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec update_signature_request(Tesla.Env.client, String.t, Docspring.Model.UpdateSignatureRequestRequest.t, keyword()) :: {:ok, Docspring.Model.SignatureRequest.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def update_signature_request(connection, signature_request_id, body, _opts \\ []) do
+  def update_signature_request(connection, signature_request_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:put)
       |> url("/signature_requests/#{signature_request_id}")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "updateSignatureRequest")
       |> Enum.into([])
@@ -2080,7 +2953,7 @@ defmodule Docspring.Api.Client do
 
   @doc """
   Update a template
-  Changes a template's draft. Properties left out keep their values. `defaults` and `html_engine_options` replace the whole object, and `field_groups` changes only the groups it lists. Settings such as `webhook_url`, `public_submissions` and `expire_after` apply to every published version too, and setting `parent_folder_id` moves the template and all of its published versions. 
+  Changes a template's draft. Properties left out keep their values. `defaults`, `html_engine_options` and a page design's `layout` replace the whole object, and `field_groups` changes only the groups it lists. A new layout adds a field for each new value it reads. Settings such as `webhook_url`, `public_submissions` and `expire_after` apply to every published version too, and setting `parent_folder_id` moves the template and all of its published versions. 
 
   ### Parameters
 
@@ -2088,6 +2961,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (UpdateTemplateRequest): The settings to change. Properties left out keep their values.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2095,12 +2969,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec update_template(Tesla.Env.client, String.t, Docspring.Model.UpdateTemplateRequest.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def update_template(connection, template_id, body, _opts \\ []) do
+  def update_template(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:put)
       |> url("/templates/#{template_id}")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "updateTemplate")
       |> Enum.into([])
@@ -2128,6 +3007,7 @@ defmodule Docspring.Api.Client do
   - `body` (UpdateTemplateDocumentRequest): The new PDF, or a Word template's new Word document, as one of `cache_id`, `document_url` and `document_base64`.
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until the PDF has been processed, a `document_url`'s PDF or Word document downloaded, and an OpenDocument file converted, before responding. Default true on sync.api hosts.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2137,7 +3017,8 @@ defmodule Docspring.Api.Client do
   @spec update_template_document(Tesla.Env.client, String.t, Docspring.Model.UpdateTemplateDocumentRequest.t, keyword()) :: {:ok, Docspring.Model.Template.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def update_template_document(connection, template_id, body, opts \\ []) do
     optional_params = %{
-      :wait => :query
+      :wait => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -2173,6 +3054,7 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (UpdateTemplateFieldsRequest): The fields to change in the template's draft.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2180,12 +3062,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec update_template_fields(Tesla.Env.client, String.t, Docspring.Model.UpdateTemplateFieldsRequest.t, keyword()) :: {:ok, Docspring.Model.TemplateFields.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def update_template_fields(connection, template_id, body, _opts \\ []) do
+  def update_template_fields(connection, template_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:put)
       |> url("/templates/#{template_id}/fields")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "updateTemplateFields")
       |> Enum.into([])
@@ -2211,6 +3098,7 @@ defmodule Docspring.Api.Client do
   - `webhook_id` (String.t): The webhook's ID.
   - `body` (UpdateWebhookRequest): The settings to change. Properties left out keep their values.
   - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2218,12 +3106,17 @@ defmodule Docspring.Api.Client do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec update_webhook(Tesla.Env.client, String.t, Docspring.Model.UpdateWebhookRequest.t, keyword()) :: {:ok, Docspring.Model.Webhook.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
-  def update_webhook(connection, webhook_id, body, _opts \\ []) do
+  def update_webhook(connection, webhook_id, body, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
     request =
       %{}
       |> method(:put)
       |> url("/webhooks/#{webhook_id}")
       |> add_param(:body, :body, body)
+      |> add_optional_params(optional_params, opts)
       |> finalize_request()
       |> Map.put(:opts, docspring_operation: "updateWebhook")
       |> Enum.into([])
@@ -2259,6 +3152,7 @@ defmodule Docspring.Api.Client do
     - `:field_naming` (Docspring.Model.FieldSetupNaming.t): With `detect_fields`, how the fields are named. `ai` (the default) names them and sets their types and settings with AI; `preserve` keeps the names of the PDF's form fields, and AI only names the fields it detected. `preserve` needs `field_source` `auto` or `pdf_form_fields`.
     - `:field_logic` (Docspring.Model.FieldSetupLogic.t): With `detect_fields`, whether AI reads the whole form once the fields are named and sets up conditional logic and required fields (`ai`) or not (`none`). Default: your account's template settings.
     - `:output_format` (Docspring.Model.OutputFormat.t): What each submission of a Word template makes unless its request sets `output_formats`: `docx` (a Word document), `odt` (an OpenDocument file, converted from the Word document) or `pdf`. Required when `document` is a Word document.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2277,7 +3171,8 @@ defmodule Docspring.Api.Client do
       :field_source => :multipart_form,
       :field_naming => :multipart_form,
       :field_logic => :multipart_form,
-      :output_format => :multipart_form
+      :output_format => :multipart_form,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -2314,6 +3209,7 @@ defmodule Docspring.Api.Client do
   - `opts` (keyword): Optional parameters
     - `:wait` (boolean()): Wait until the PDF has been processed, a `document_url`'s PDF or Word document downloaded, and an OpenDocument file converted, before responding. Default true on sync.api hosts.
     - `:reimport_fields` (boolean()): Replace all of the template's fields with the fillable fields in the new PDF, once DocSpring has processed it (`document.field_reimport_state`). As on a first upload, the default typeface, font size, bold and color are taken from the PDF's fields; the template's other settings are kept. If the PDF has no fillable fields, the template keeps its fields. A locked template can't re-import its fields. Only for PDF templates: a Word template adds a field for each new tag.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2324,7 +3220,8 @@ defmodule Docspring.Api.Client do
   def upload_template_document(connection, template_id, document, opts \\ []) do
     optional_params = %{
       :wait => :query,
-      :reimport_fields => :multipart_form
+      :reimport_fields => :multipart_form,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -2359,7 +3256,8 @@ defmodule Docspring.Api.Client do
   - `template_id` (String.t): The template's ID.
   - `body` (ValidateSubmissionRequest): The submission's data and settings.
   - `opts` (keyword): Optional parameters
-    - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` or `draft`. Default `latest` (the draft when no version has been published).
+    - `:version` (String.t): The template version to use: a published version (`1.2.0`, or `1` for the latest 1.x.x), `latest` (the newest published version, or the draft when none has been published) or `draft`. Default `latest`.
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
 
   ### Returns
 
@@ -2369,7 +3267,8 @@ defmodule Docspring.Api.Client do
   @spec validate_submission(Tesla.Env.client, String.t, Docspring.Model.ValidateSubmissionRequest.t, keyword()) :: {:ok, Docspring.Model.SubmissionValidation.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
   def validate_submission(connection, template_id, body, opts \\ []) do
     optional_params = %{
-      :version => :query
+      :version => :query,
+      :"Idempotency-Key" => :headers
     }
 
     request =
@@ -2388,6 +3287,47 @@ defmodule Docspring.Api.Client do
       {200, Docspring.Model.SubmissionValidation},
       {404, Docspring.Model.ErrorResponse},
       {422, Docspring.Model.ErrorResponse},
+      {401, Docspring.Model.ErrorResponse},
+      {429, Docspring.Model.ErrorResponse}
+    ])
+  end
+
+  @doc """
+  Verify an email domain
+  Checks the email domain's DNS records now, instead of waiting for the next check. If DocSpring has stopped looking for its DKIM records (3 days after they were created), it starts again with new ones: replace the CNAME records with them. 
+
+  ### Parameters
+
+  - `connection` (Docspring.Connection): Connection to server
+  - `email_domain_id` (String.t): The email domain's ID.
+  - `opts` (keyword): Optional parameters
+    - `:"Idempotency-Key"` (String.t): A key of your own, such as a UUID, that makes it safe to send this request again: for 24 hours, DocSpring answers a request with the same key from the same API token with the first request's response (and an `Idempotent-Replayed: true` header) instead of processing it again. Send a new key with each new request, and the same key each time you send the same request again, such as after a timeout, a network error or a 5xx. The same key with a different request is a 422 `idempotency_key_reused`. A 409 `idempotency_key_in_use` with a `Retry-After` header means the first request is still being processed: send the request again then.
+
+  ### Returns
+
+  - `{:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec verify_email_domain(Tesla.Env.client, String.t, keyword()) :: {:ok, Docspring.Model.EmailDomain.t} | {:ok, Docspring.Model.ErrorResponse.t} | {:error, Tesla.Env.t}
+  def verify_email_domain(connection, email_domain_id, opts \\ []) do
+    optional_params = %{
+      :"Idempotency-Key" => :headers
+    }
+
+    request =
+      %{}
+      |> method(:post)
+      |> url("/email_domains/#{email_domain_id}/verify")
+      |> add_optional_params(optional_params, opts)
+      |> ensure_body()
+      |> finalize_request()
+      |> Map.put(:opts, docspring_operation: "verifyEmailDomain")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, Docspring.Model.EmailDomain},
       {401, Docspring.Model.ErrorResponse},
       {429, Docspring.Model.ErrorResponse}
     ])

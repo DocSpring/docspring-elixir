@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.SubmissionActionType do
   @moduledoc """
-  The kind of storage a submission action uploads the PDF to.
+  The kind of storage a submission action uploads the PDF to, or `email`.
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """

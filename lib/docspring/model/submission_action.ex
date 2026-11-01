@@ -3,13 +3,14 @@
 
 defmodule Docspring.Model.SubmissionAction do
   @moduledoc """
-  An upload of a PDF to your storage, such as an S3 bucket.
+  An upload of a PDF to your storage, such as an S3 bucket, or an email action's email.
   """
 
   @derive JSON.Encoder
   defstruct [
     :id,
     :integration_id,
+    :email_action_id,
     :state,
     :action_type,
     :result_data,
@@ -19,6 +20,7 @@ defmodule Docspring.Model.SubmissionAction do
   @type t :: %__MODULE__{
     :id => String.t,
     :integration_id => String.t | nil,
+    :email_action_id => String.t | nil,
     :state => Docspring.Model.SubmissionActionState.t,
     :action_type => Docspring.Model.SubmissionActionType.t,
     :result_data => %{optional(String.t) => any()},

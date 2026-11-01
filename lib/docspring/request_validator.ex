@@ -418,6 +418,12 @@ defmodule Docspring.RequestValidator do
         detail(location, "#{pointer}/#{escape(name)}", "required", "is required")
       end
 
+    # Only an update's body has minProperties, and it's always 1 (api_clients/scripts/extract_request_schemas)
+    min_properties =
+      if schema["minProperties"] && map_size(data) < schema["minProperties"],
+        do: [detail(location, pointer, "minProperties", "must have at least one property to change")],
+        else: []
+
     properties = schema["properties"] || %{}
 
     fields =
@@ -439,7 +445,7 @@ defmodule Docspring.RequestValidator do
         end
       end)
 
-    required ++ fields
+    required ++ min_properties ++ fields
   end
 
   defp unknown_property(schema, name, pointer, location) do

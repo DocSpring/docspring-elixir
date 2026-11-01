@@ -1,3 +1,58 @@
+### 4.4.0 [November 1, 2026]
+
+- New: list_email_actions, create_email_action, get_email_action, update_email_action and delete_email_action manage a
+  template's email actions (`EmailAction`), which email each processed submission's files as attachments or a download
+  link. `to`, `cc` and `bcc` take addresses, and tags for an address in the submission's fields
+  (`{{ data.client_email }}`) or metadata (`{{ metadata.agent_email }}`). `send_when` sends only for the submissions
+  that meet its conditions. `file_name` names the attached files, and `file_formats` chooses them: a Word template's
+  Word document (`docx`), OpenDocument file (`odt`) or PDF (`pdf`), or every file the submission made (`all`). Attached
+  files over `max_attachment_mb` together (7 MB unless you raise it, up to 25) go as a link instead.
+  send_email_action_test_email sends one to you to check how it looks (`EmailActionTestEmail`). Without a paid plan
+  (Starter or higher), email actions only email your team: test emails, and test submissions' emails.
+- New: list_account_email_actions, create_account_email_action, get_account_email_action, update_account_email_action
+  and delete_account_email_action manage your account's email actions, which send for every template, or for the
+  templates and folders they list (`template_ids`, `folder_ids`). send_account_email_action_test_email sends one to you
+  for one of its templates.
+- New: list_email_actions also lists your account's email actions that send for the template, with the template's
+  changes in `customization` (`EmailActionCustomization`). update_email_action_customization changes one for that
+  template only, or turns it off there (`enabled`), and delete_email_action_customization removes the template's
+  changes.
+- New: list_email_domains, create_email_domain, get_email_domain, verify_email_domain and delete_email_domain manage the
+  domains your email actions send from (`EmailDomain`), with the DNS records to add to each one (`EmailDomainDnsRecord`).
+- A submission's `actions` include the emails its email actions sent (its template's and your account's), with each
+  recipient and what happened to their email, and a new `email_action_id`.
+- New: a field's `string_condition_type` can be `not_equals`, `not_contains`, `not_starts_with`, `not_ends_with`,
+  `not_regex`, `blank` or `not_blank`, and a `regex` condition uses RE2 syntax (no lookarounds or backreferences).
+- create_submission: DocSpring now emails the signers of a submission's `signature_requests` a link to sign, any
+  reminders, and the signed PDF once everyone has signed. Set `send_email` to false, for the submission or for one
+  signature request, when you send the links yourself or show the signing form in your app. A signature request that
+  DocSpring emails needs an `email`, and its `auth_type` is optional (`email_link`). Before anyone is emailed, the
+  request can be refused with a 402 (`insufficient_credits_to_send`), a 403 or a 429 (`daily_email_limit_reached`), and
+  nothing is saved.
+- New create_submission properties for these emails: `signing_order` (`SigningOrder`) with each signature request's
+  `signing_step`, `email_subject`, `email_message`, `cc`, `reply_to`, `notification_emails`, `notify_when_signed` and
+  `reminders` (`SignatureRequestReminders`).
+- A signature request has `send_email`, `signing_step`, `sent_at` and `email_status` (`SignatureRequestEmailStatus`),
+  and a submission has `signing_order`.
+- Templates have new settings for these emails: `signature_request_from_name`, `signature_request_from_address`,
+  `signature_request_signing_url`, `signature_request_include_signing_token`, `signature_request_reply_to`,
+  `signature_request_notification_emails` and `signature_request_email_attachments`
+  (`SignatureRequestEmailAttachments`).
+- New webhook event types: `signature_request.sent` and `signature_request.email_bounced`.
+- New: page designs (`template_type` `page_designer`), PDFs designed in the Page Designer from a JSON layout, with no
+  document to start from. create_template makes one from its `layout`, or with an empty page when `layout` is left
+  out, and update_template replaces its layout. DocSpring adds a field for each value the layout reads. A template's
+  `layout` is in the [Page Designer layout format](https://docspring.com/docs/page-designer/layout-format/) (its
+  [JSON Schema](https://docspring.com/schemas/page-designer/layout.v1.json)), and is null for other templates.
+- New: every method that creates, changes or deletes something takes an `Idempotency-Key` header, as the
+  `:"Idempotency-Key"` option. Send the same key when you send a request again after a timeout or a network error:
+  within 24 hours, DocSpring returns the first response instead of running the request twice. Arguments you already pass
+  keep their places.
+- Changed: the request validator checks what API v2 now refuses: an ID, a query value or a template name that's blank or
+  only whitespace, an update with nothing to change, a version with a leading zero (`01`), a `filename` with a slash, a
+  signer `email` that isn't an email address, and an HTML template's `scale` outside 0.1 to 2.
+- New: get_template_model_code takes `rust` as its `lang`, for Rust structs that serde reads and writes.
+
 ### 4.3.0 [October 31, 2026]
 
 - New: get_template_model_code takes `rust` as its `lang`, for Rust structs that serde reads and writes.

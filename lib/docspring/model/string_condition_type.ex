@@ -12,7 +12,7 @@ defmodule Docspring.Model.StringConditionType do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["equals", "contains", "starts_with", "ends_with", "regex"]
+  def values, do: ["equals", "not_equals", "contains", "not_contains", "starts_with", "not_starts_with", "ends_with", "not_ends_with", "regex", "not_regex", "blank", "not_blank"]
 
   def decode(value), do: value
 end

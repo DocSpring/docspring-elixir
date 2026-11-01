@@ -12,7 +12,7 @@ defmodule Docspring.Model.SignatureRequestEventType do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["send_request", "view_request", "accepted_terms", "decline_request", "sign_request", "all_completed"]
+  def values, do: ["send_request", "view_request", "accepted_terms", "decline_request", "sign_request", "all_completed", "email_bounced", "email_marked_as_spam"]
 
   def decode(value), do: value
 end

@@ -44,6 +44,13 @@ defmodule Docspring.Model.Template do
     :public_submissions,
     :public_web_form,
     :redirect_url,
+    :signature_request_email_attachments,
+    :signature_request_from_address,
+    :signature_request_include_signing_token,
+    :signature_request_from_name,
+    :signature_request_notification_emails,
+    :signature_request_reply_to,
+    :signature_request_signing_url,
     :has_slack_webhook_url,
     :last_changed_by,
     :defaults,
@@ -57,6 +64,7 @@ defmodule Docspring.Model.Template do
     :footer_html,
     :html_engine_options,
     :html_escape_data,
+    :layout,
     :embed_edit_token,
     :versions
   ]
@@ -98,6 +106,13 @@ defmodule Docspring.Model.Template do
     :public_submissions => boolean(),
     :public_web_form => boolean(),
     :redirect_url => String.t | nil,
+    :signature_request_email_attachments => Docspring.Model.SignatureRequestEmailAttachments.t | nil,
+    :signature_request_from_address => String.t | nil,
+    :signature_request_include_signing_token => boolean(),
+    :signature_request_from_name => String.t | nil,
+    :signature_request_notification_emails => [String.t],
+    :signature_request_reply_to => String.t | nil,
+    :signature_request_signing_url => String.t | nil,
     :has_slack_webhook_url => boolean(),
     :last_changed_by => Docspring.Model.TemplateActor.t | nil,
     :defaults => Docspring.Model.TemplateDefaults.t,
@@ -111,6 +126,7 @@ defmodule Docspring.Model.Template do
     :footer_html => String.t | nil,
     :html_engine_options => Docspring.Model.HtmlEngineOptions.t | nil,
     :html_escape_data => boolean() | nil,
+    :layout => %{optional(String.t) => any()} | nil,
     :embed_edit_token => String.t | nil,
     :versions => [Docspring.Model.TemplateVersion.t]
   }
@@ -125,6 +141,7 @@ defmodule Docspring.Model.Template do
      |> Deserializer.deserialize(:ai_field_naming_language, :struct, Docspring.Model.AiFieldNamingLanguage)
      |> Deserializer.deserialize(:default_form_mode, :struct, Docspring.Model.TemplateFormMode)
      |> Deserializer.deserialize(:expiration_interval, :struct, Docspring.Model.ExpirationInterval)
+     |> Deserializer.deserialize(:signature_request_email_attachments, :struct, Docspring.Model.SignatureRequestEmailAttachments)
      |> Deserializer.deserialize(:last_changed_by, :struct, Docspring.Model.TemplateActor)
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaults)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependency)

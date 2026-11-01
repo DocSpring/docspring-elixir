@@ -22,7 +22,9 @@ defmodule Docspring.Model.SignatureRequestInput do
     :auth_username_hash,
     :auth_phone_number_hash,
     :ignore_unknown_fields,
-    :prefilled_values_editable
+    :prefilled_values_editable,
+    :send_email,
+    :signing_step
   ]
 
   @type t :: %__MODULE__{
@@ -31,7 +33,7 @@ defmodule Docspring.Model.SignatureRequestInput do
     :fields => [String.t],
     :metadata => %{optional(String.t) => any()} | nil,
     :role => String.t | nil,
-    :auth_type => Docspring.Model.SignatureRequestAuthType.t,
+    :auth_type => Docspring.Model.SignatureRequestAuthType.t | nil,
     :auth_second_factor_type => Docspring.Model.SignatureRequestAuthSecondFactorType.t | nil,
     :auth_provider => String.t | nil,
     :auth_session_started_at => DateTime.t | nil,
@@ -40,7 +42,9 @@ defmodule Docspring.Model.SignatureRequestInput do
     :auth_username_hash => String.t | nil,
     :auth_phone_number_hash => String.t | nil,
     :ignore_unknown_fields => boolean() | nil,
-    :prefilled_values_editable => boolean() | nil
+    :prefilled_values_editable => boolean() | nil,
+    :send_email => boolean() | nil,
+    :signing_step => integer() | nil
   }
 
   alias Docspring.Deserializer

@@ -1,0 +1,77 @@
+# Written by DocSpring/docspring's api_clients/scripts/generate from api_clients/github_workflows/elixir/release.yml:
+# change it there.
+#
+# Builds the package on every push and pull request. A v* tag (pushed by the monorepo's api_clients/scripts/release)
+# also publishes it and its docs to Hex, in the release environment, and waits until Hex serves it. Hex's workload
+# identities (OIDC) aren't turned on for the package yet, so publishing uses HEX_API_KEY, a key that can only publish
+# docspring, as a secret of the release environment.
+name: Release
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - name: Check the tag matches the package version
+        if: github.ref_type == 'tag'
+        run: |
+          VERSION="$(sed -n 's/^ *version: "\(.*\)",$/\1/p' mix.exs)"
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::The tag is $GITHUB_REF_NAME, but the package version is $VERSION"
+            exit 1
+          fi
+      - run: mix deps.get
+      - run: mix hex.build
+      - run: mix docs
+
+  publish:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      # mix hex.publish builds the package and its docs from the source
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - run: mix deps.get
+      - run: mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+
+  verify:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Wait until Hex serves the version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          for _ in $(seq 60); do
+            if curl -fsS -o /dev/null "https://hex.pm/api/packages/docspring/releases/$VERSION"; then
+              echo "Hex serves docspring $VERSION"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Hex doesn't serve docspring $VERSION after 10 minutes"
+          exit 1

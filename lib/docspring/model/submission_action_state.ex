@@ -3,7 +3,7 @@
 
 defmodule Docspring.Model.SubmissionActionState do
   @moduledoc """
-  Where a submission action (an upload to your storage) is.
+  Where a submission action (an upload to your storage, or an email) is.
 
   A string. `values/0` lists the values this client knows: a newer API can return others, which are kept as they are.
   """

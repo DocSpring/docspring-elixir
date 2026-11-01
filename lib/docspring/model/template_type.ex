@@ -12,7 +12,7 @@ defmodule Docspring.Model.TemplateType do
 
   @doc "The values this client knows"
   @spec values() :: [String.t()]
-  def values, do: ["pdf", "html", "docx"]
+  def values, do: ["pdf", "html", "docx", "page_designer"]
 
   def decode(value), do: value
 end

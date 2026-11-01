@@ -34,6 +34,13 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :public_submissions,
     :public_web_form,
     :redirect_url,
+    :signature_request_email_attachments,
+    :signature_request_from_address,
+    :signature_request_include_signing_token,
+    :signature_request_from_name,
+    :signature_request_notification_emails,
+    :signature_request_reply_to,
+    :signature_request_signing_url,
     :slack_webhook_url,
     :defaults,
     :field_dependencies,
@@ -45,6 +52,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :footer_html,
     :html_engine_options,
     :html_escape_data,
+    :layout,
     :cache_id,
     :document_url,
     :document_base64,
@@ -82,6 +90,13 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :public_submissions => boolean() | nil,
     :public_web_form => boolean() | nil,
     :redirect_url => String.t | nil,
+    :signature_request_email_attachments => Docspring.Model.SignatureRequestEmailAttachments.t | nil,
+    :signature_request_from_address => String.t | nil,
+    :signature_request_include_signing_token => boolean() | nil,
+    :signature_request_from_name => String.t | nil,
+    :signature_request_notification_emails => [String.t] | nil,
+    :signature_request_reply_to => String.t | nil,
+    :signature_request_signing_url => String.t | nil,
     :slack_webhook_url => String.t | nil,
     :defaults => Docspring.Model.TemplateDefaultsInput.t | nil,
     :field_dependencies => [Docspring.Model.TemplateFieldDependencyInput.t] | nil,
@@ -93,6 +108,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :footer_html => String.t | nil,
     :html_engine_options => Docspring.Model.HtmlEngineOptionsInput.t | nil,
     :html_escape_data => boolean() | nil,
+    :layout => %{optional(String.t) => any()} | nil,
     :cache_id => String.t | nil,
     :document_url => String.t | nil,
     :document_base64 => String.t | nil,
@@ -112,6 +128,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
      |> Deserializer.deserialize(:ai_field_naming_language, :struct, Docspring.Model.AiFieldNamingLanguage)
      |> Deserializer.deserialize(:default_form_mode, :struct, Docspring.Model.TemplateFormMode)
      |> Deserializer.deserialize(:expiration_interval, :struct, Docspring.Model.ExpirationInterval)
+     |> Deserializer.deserialize(:signature_request_email_attachments, :struct, Docspring.Model.SignatureRequestEmailAttachments)
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaultsInput)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependencyInput)
      |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedFieldInput)
