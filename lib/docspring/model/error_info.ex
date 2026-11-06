@@ -18,7 +18,9 @@ defmodule Docspring.Model.ErrorInfo do
     :template_id,
     :folder_id,
     :custom_file_id,
-    :webhook_id
+    :webhook_id,
+    :email_action_id,
+    :email_domain_id
   ]
 
   @type t :: %__MODULE__{
@@ -32,7 +34,9 @@ defmodule Docspring.Model.ErrorInfo do
     :template_id => String.t | nil,
     :folder_id => String.t | nil,
     :custom_file_id => String.t | nil,
-    :webhook_id => String.t | nil
+    :webhook_id => String.t | nil,
+    :email_action_id => String.t | nil,
+    :email_domain_id => String.t | nil
   }
 
   alias Docspring.Deserializer

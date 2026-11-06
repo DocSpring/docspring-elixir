@@ -41,6 +41,9 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :signature_request_notification_emails,
     :signature_request_reply_to,
     :signature_request_signing_url,
+    :success_title,
+    :success_message,
+    :show_fill_again_button,
     :slack_webhook_url,
     :defaults,
     :field_dependencies,
@@ -60,7 +63,8 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :detect_fields,
     :field_source,
     :field_naming,
-    :field_logic
+    :field_logic,
+    :include_office_use_fields
   ]
 
   @type t :: %__MODULE__{
@@ -97,6 +101,9 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :signature_request_notification_emails => [String.t] | nil,
     :signature_request_reply_to => String.t | nil,
     :signature_request_signing_url => String.t | nil,
+    :success_title => String.t | nil,
+    :success_message => String.t | nil,
+    :show_fill_again_button => boolean() | nil,
     :slack_webhook_url => String.t | nil,
     :defaults => Docspring.Model.TemplateDefaultsInput.t | nil,
     :field_dependencies => [Docspring.Model.TemplateFieldDependencyInput.t] | nil,
@@ -116,7 +123,8 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :detect_fields => boolean() | nil,
     :field_source => Docspring.Model.FieldSetupSource.t | nil,
     :field_naming => Docspring.Model.FieldSetupNaming.t | nil,
-    :field_logic => Docspring.Model.FieldSetupLogic.t | nil
+    :field_logic => Docspring.Model.FieldSetupLogic.t | nil,
+    :include_office_use_fields => boolean() | nil
   }
 
   alias Docspring.Deserializer

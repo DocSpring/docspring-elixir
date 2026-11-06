@@ -1,3 +1,18 @@
+### 4.5.0 [November 7, 2026]
+
+- New: `Template` has `form_sections`, the web form's sections in order (`TemplateFormSection`: an `id`, a `title`, a
+  `description` and the `field_ids` in it), which update_template takes too. Setting them replaces all of the sections.
+- New: `Template` has `success_title`, `success_message` and `show_fill_again_button`, what the web form shows once
+  it's submitted, which create_template and update_template take too.
+- New: create_template and upload_template take `include_office_use_fields`: with `detect_fields`, whether AI field
+  setup keeps the fields that only the office receiving the form fills in, such as a "For office use only" box. It
+  leaves them out by default (your account's template settings).
+- Changed: the request validator refuses a `filename` that's blank or only whitespace (create_template,
+  update_template_document), and an empty `field_groups` list in update_template.
+- New: a 409 `idempotency_key_in_use` error names what the first request with the key did: the email action
+  (`email_action_id`) or email domain (`email_domain_id`) it created, or the template whose fields it changed or whose
+  version it published (`template_id`).
+
 ### 4.4.0 [November 1, 2026]
 
 - New: list_email_actions, create_email_action, get_email_action, update_email_action and delete_email_action manage a

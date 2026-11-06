@@ -54,6 +54,10 @@ jobs:
           otp-version: '27'
           elixir-version: '1.18'
       - run: mix deps.get
+      # Compiles the dependencies and the package, and builds the docs, before the key is in the environment, so
+      # mix hex.publish compiles nothing. Its docs task still runs ExDoc again, and Hex itself, with the key.
+      - run: mix compile
+      - run: mix docs
       - run: mix hex.publish --yes
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}

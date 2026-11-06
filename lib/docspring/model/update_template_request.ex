@@ -40,10 +40,14 @@ defmodule Docspring.Model.UpdateTemplateRequest do
     :signature_request_notification_emails,
     :signature_request_reply_to,
     :signature_request_signing_url,
+    :success_title,
+    :success_message,
+    :show_fill_again_button,
     :slack_webhook_url,
     :defaults,
     :field_dependencies,
     :field_groups,
+    :form_sections,
     :predefined_fields,
     :predefined_fields_sample_data,
     :html,
@@ -88,10 +92,14 @@ defmodule Docspring.Model.UpdateTemplateRequest do
     :signature_request_notification_emails => [String.t] | nil,
     :signature_request_reply_to => String.t | nil,
     :signature_request_signing_url => String.t | nil,
+    :success_title => String.t | nil,
+    :success_message => String.t | nil,
+    :show_fill_again_button => boolean() | nil,
     :slack_webhook_url => String.t | nil,
     :defaults => Docspring.Model.TemplateDefaultsInput.t | nil,
     :field_dependencies => [Docspring.Model.TemplateFieldDependencyInput.t] | nil,
     :field_groups => [Docspring.Model.FieldGroupInput.t] | nil,
+    :form_sections => [Docspring.Model.TemplateFormSectionInput.t] | nil,
     :predefined_fields => [Docspring.Model.PredefinedFieldInput.t] | nil,
     :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
@@ -115,6 +123,7 @@ defmodule Docspring.Model.UpdateTemplateRequest do
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaultsInput)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependencyInput)
      |> Deserializer.deserialize(:field_groups, :list, Docspring.Model.FieldGroupInput)
+     |> Deserializer.deserialize(:form_sections, :list, Docspring.Model.TemplateFormSectionInput)
      |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedFieldInput)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptionsInput)
   end

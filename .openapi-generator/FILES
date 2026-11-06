@@ -160,6 +160,8 @@ lib/docspring/model/template_field_logic_status.ex
 lib/docspring/model/template_field_move.ex
 lib/docspring/model/template_fields.ex
 lib/docspring/model/template_form_mode.ex
+lib/docspring/model/template_form_section.ex
+lib/docspring/model/template_form_section_input.ex
 lib/docspring/model/template_model_code.ex
 lib/docspring/model/template_page_ai_error.ex
 lib/docspring/model/template_page_ai_naming_status.ex

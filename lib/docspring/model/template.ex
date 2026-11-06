@@ -51,11 +51,15 @@ defmodule Docspring.Model.Template do
     :signature_request_notification_emails,
     :signature_request_reply_to,
     :signature_request_signing_url,
+    :success_title,
+    :success_message,
+    :show_fill_again_button,
     :has_slack_webhook_url,
     :last_changed_by,
     :defaults,
     :field_dependencies,
     :field_groups,
+    :form_sections,
     :predefined_fields,
     :predefined_fields_sample_data,
     :html,
@@ -113,11 +117,15 @@ defmodule Docspring.Model.Template do
     :signature_request_notification_emails => [String.t],
     :signature_request_reply_to => String.t | nil,
     :signature_request_signing_url => String.t | nil,
+    :success_title => String.t | nil,
+    :success_message => String.t | nil,
+    :show_fill_again_button => boolean(),
     :has_slack_webhook_url => boolean(),
     :last_changed_by => Docspring.Model.TemplateActor.t | nil,
     :defaults => Docspring.Model.TemplateDefaults.t,
     :field_dependencies => [Docspring.Model.TemplateFieldDependency.t],
     :field_groups => [Docspring.Model.FieldGroup.t],
+    :form_sections => [Docspring.Model.TemplateFormSection.t],
     :predefined_fields => [Docspring.Model.PredefinedField.t],
     :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
@@ -146,6 +154,7 @@ defmodule Docspring.Model.Template do
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaults)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependency)
      |> Deserializer.deserialize(:field_groups, :list, Docspring.Model.FieldGroup)
+     |> Deserializer.deserialize(:form_sections, :list, Docspring.Model.TemplateFormSection)
      |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedField)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptions)
      |> Deserializer.deserialize(:versions, :list, Docspring.Model.TemplateVersion)

@@ -20,6 +20,8 @@ keeps it.
 - https://docspring.com/docs/: the guides. https://docspring.com/docs/api/: the API reference, with Elixir code
   for every method.
 - https://docspring.com/api-docs/v2/openapi.json: the OpenAPI spec this SDK is generated from.
+- https://docspring.com/docs/cli/: the DocSpring CLI (`docspring`), for scripts and terminal work outside Elixir
+  code. https://docspring.com/docs/mcp/: the MCP server, which connects AI assistants to a DocSpring account.
 
 ## Set up
 
