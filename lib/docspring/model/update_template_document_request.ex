@@ -12,7 +12,8 @@ defmodule Docspring.Model.UpdateTemplateDocumentRequest do
     :document_url,
     :document_base64,
     :filename,
-    :reimport_fields
+    :reimport_fields,
+    :sync_fields
   ]
 
   @type t :: %__MODULE__{
@@ -20,7 +21,8 @@ defmodule Docspring.Model.UpdateTemplateDocumentRequest do
     :document_url => String.t | nil,
     :document_base64 => String.t | nil,
     :filename => String.t | nil,
-    :reimport_fields => boolean() | nil
+    :reimport_fields => boolean() | nil,
+    :sync_fields => boolean() | nil
   }
 
   def decode(value) do

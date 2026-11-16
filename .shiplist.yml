@@ -1,0 +1,33 @@
+# Written by DocSpring/docspring's api_clients/scripts/generate from api_clients/github_workflows/elixir/.shiplist.yml:
+# change it there.
+#
+# The files the Hex package may hold (https://github.com/DocSpring/shiplist): mix.exs's `files`. The release workflow
+# builds the package and fails if it has any other file.
+version: 1
+stages: [package]
+
+remove_before:
+  package:
+    include:
+      - '.*'
+      - '.*/**'
+      - 'test/'
+      - 'CHANGELOG.md'
+      - 'mix.lock'
+    exclude:
+      # mix format reads it in projects that import the package's formatter rules
+      - '.formatter.exs'
+
+keep:
+  include:
+    - 'config/'
+    - 'lib/'
+    - '.formatter.exs'
+    - 'AGENTS.md'
+    - 'LICENSE'
+    - 'mix.exs'
+    - 'README.md'
+
+forbid:
+  - '**/.env'
+  - '**/.env.*'

@@ -18,6 +18,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :ai_field_naming_language,
     :allow_additional_properties,
     :allow_skipping_optional_fields,
+    :continue_before_optional_fields,
     :default_form_mode,
     :editable_submissions,
     :embed_domains,
@@ -44,9 +45,12 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :success_title,
     :success_message,
     :show_fill_again_button,
+    :form_sections_in_order,
     :slack_webhook_url,
     :defaults,
     :field_dependencies,
+    :signer_roles,
+    :signature_request_cc,
     :predefined_fields,
     :predefined_fields_sample_data,
     :html,
@@ -56,6 +60,8 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :html_engine_options,
     :html_escape_data,
     :layout,
+    :override_account_expiry,
+    :sync_fields,
     :cache_id,
     :document_url,
     :document_base64,
@@ -78,6 +84,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :ai_field_naming_language => Docspring.Model.AiFieldNamingLanguage.t | nil,
     :allow_additional_properties => boolean() | nil,
     :allow_skipping_optional_fields => boolean() | nil,
+    :continue_before_optional_fields => boolean() | nil,
     :default_form_mode => Docspring.Model.TemplateFormMode.t | nil,
     :editable_submissions => boolean() | nil,
     :embed_domains => [String.t] | nil,
@@ -104,9 +111,12 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :success_title => String.t | nil,
     :success_message => String.t | nil,
     :show_fill_again_button => boolean() | nil,
+    :form_sections_in_order => boolean() | nil,
     :slack_webhook_url => String.t | nil,
     :defaults => Docspring.Model.TemplateDefaultsInput.t | nil,
     :field_dependencies => [Docspring.Model.TemplateFieldDependencyInput.t] | nil,
+    :signer_roles => [Docspring.Model.TemplateSignerRoleInput.t] | nil,
+    :signature_request_cc => [String.t] | nil,
     :predefined_fields => [Docspring.Model.PredefinedFieldInput.t] | nil,
     :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
@@ -116,6 +126,8 @@ defmodule Docspring.Model.CreateTemplateRequest do
     :html_engine_options => Docspring.Model.HtmlEngineOptionsInput.t | nil,
     :html_escape_data => boolean() | nil,
     :layout => %{optional(String.t) => any()} | nil,
+    :override_account_expiry => boolean() | nil,
+    :sync_fields => boolean() | nil,
     :cache_id => String.t | nil,
     :document_url => String.t | nil,
     :document_base64 => String.t | nil,
@@ -139,6 +151,7 @@ defmodule Docspring.Model.CreateTemplateRequest do
      |> Deserializer.deserialize(:signature_request_email_attachments, :struct, Docspring.Model.SignatureRequestEmailAttachments)
      |> Deserializer.deserialize(:defaults, :struct, Docspring.Model.TemplateDefaultsInput)
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependencyInput)
+     |> Deserializer.deserialize(:signer_roles, :list, Docspring.Model.TemplateSignerRoleInput)
      |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedFieldInput)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptionsInput)
      |> Deserializer.deserialize(:field_source, :struct, Docspring.Model.FieldSetupSource)

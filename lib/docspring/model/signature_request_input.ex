@@ -30,7 +30,7 @@ defmodule Docspring.Model.SignatureRequestInput do
   @type t :: %__MODULE__{
     :name => String.t | nil,
     :email => String.t | nil,
-    :fields => [String.t],
+    :fields => [String.t] | nil,
     :metadata => %{optional(String.t) => any()} | nil,
     :role => String.t | nil,
     :auth_type => Docspring.Model.SignatureRequestAuthType.t | nil,

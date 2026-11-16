@@ -95,6 +95,7 @@ lib/docspring/model/model_code_language.ex
 lib/docspring/model/move_folder_request.ex
 lib/docspring/model/move_template_request.ex
 lib/docspring/model/number_condition_type.ex
+lib/docspring/model/number_part.ex
 lib/docspring/model/output_format.ex
 lib/docspring/model/page_format.ex
 lib/docspring/model/page_image.ex
@@ -171,6 +172,8 @@ lib/docspring/model/template_page_images.ex
 lib/docspring/model/template_page_processing_status.ex
 lib/docspring/model/template_preview.ex
 lib/docspring/model/template_preview_state.ex
+lib/docspring/model/template_signer_role.ex
+lib/docspring/model/template_signer_role_input.ex
 lib/docspring/model/template_source_pdf.ex
 lib/docspring/model/template_summary.ex
 lib/docspring/model/template_summary_list.ex

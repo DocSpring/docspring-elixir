@@ -1,3 +1,41 @@
+### 4.6.0 [November 17, 2026]
+
+- New: `Field` has `comb_fill_from_right`, `comb_pad_with_zeros` and `print_digits_only`, which set how a comb
+  field's value fills its boxes: from the right, padded with zeros, or with only its digits (so `123-45-6789` fills an
+  SSN's 9 boxes). `FieldOverride` takes `comb_fill_from_right` and `comb_pad_with_zeros`.
+- New: `Field` has `number_part`, which part of a number the field prints: `all`, `whole` or `decimals`, so one amount
+  fills a dollars field and a cents field. `FieldOverride` takes it too.
+- New: `Field` has `option_labels`, the label forms show for each of its options, keyed by the option, such as
+  `{"married_filing_jointly": "Married filing jointly"}` (the data keeps the option), and `print_option_labels`, which
+  prints the chosen option's label on the PDF instead of the option. `FieldOverride` takes both, and `PredefinedField`
+  takes `option_labels`.
+- New: `Template` has `override_account_expiry`, which create_template and update_template take too: whether the
+  template's own expiry (`expire_submissions`, `expire_after` and `expiration_interval`) decides when its submissions
+  are deleted, or your account's data retention settings do. Creating a template with `expire_submissions` turns it on.
+- New: `SubmissionFiles` has `signing_manifest`, the audit data behind a signed submission's audit trail, as JSON.
+- Changed: without `expires_in`, a submission follows its template's expiry, or your account's data retention settings
+  when the template doesn't override them, and a combined PDF follows your account's settings.
+- New: `Template` has `form_sections_in_order`, whether a web form with sections makes people fill them out in order, which create_template and update_template take too.
+- New: `Template` has `continue_before_optional_fields`, whether visual forms and signature requests show Continue
+  next to Next as soon as the required fields are filled in (on by default), which create_template and update_template take too.
+  `allow_skipping_optional_fields` is now only for pages on Visual Forms JS 2.16.0 to 2.23.0.
+- New: signature requests on HTML templates, Word templates and page designs. DocSpring makes the document when you
+  create the signature requests, and signers fill in its form fields. See [how they
+  work](https://docspring.com/docs/forms/signature-requests/#html-templates-word-templates-and-page-designs).
+- Changed: a signature request's `fields` (`SignatureRequestInput`) is optional. A signature request with a `role` gets
+  the fields the template gives that role, and a submission's only signature request can leave out both: it gets every
+  field without a role that `data` doesn't fill in.
+- New: `Template` has `signer_roles`, the people who sign its submissions (`TemplateSignerRole`: an `id`, a `key`, a
+  `name`, and a `name_expression` and an `email_expression` for a signature request that doesn't give a name or email
+  address), and `signature_request_cc`, who gets a copy of the completed document. create_template and update_template
+  take them too.
+- New: a field has `signer_role`, the key of the signer role that fills it in or signs it, or `sender` for a field that
+  `data` fills in. add_template_fields and update_template_fields take it too.
+- New: create_template, upload_template, update_template, update_template_document and upload_template_document take
+  `sync_fields` (default true): an HTML template's code, a Word template's document or a page design's layout adds a
+  field for each value it reads for the first time. A Word template takes it with its document
+  (update_template_document and upload_template_document), not update_template.
+
 ### 4.5.0 [November 7, 2026]
 
 - New: `Template` has `form_sections`, the web form's sections in order (`TemplateFormSection`: an `id`, a `title`, a

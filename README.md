@@ -13,7 +13,7 @@ pull requests are welcome.
 Outside Elixir code, the [DocSpring CLI](https://docspring.com/docs/cli/) calls the same API from a terminal or a
 shell script, and the [MCP server](https://docspring.com/docs/mcp/) connects AI assistants to your account.
 
-Version 4.5.0. Requires Elixir ~> 1.18.
+Version 4.6.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -22,7 +22,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 4.5.0"}
+    {:docspring, "~> 4.6.0"}
   ]
 end
 ```

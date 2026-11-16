@@ -28,6 +28,7 @@ defmodule Docspring.Model.Template do
     :ai_field_naming_language,
     :allow_additional_properties,
     :allow_skipping_optional_fields,
+    :continue_before_optional_fields,
     :default_form_mode,
     :editable_submissions,
     :embed_domains,
@@ -54,12 +55,15 @@ defmodule Docspring.Model.Template do
     :success_title,
     :success_message,
     :show_fill_again_button,
+    :form_sections_in_order,
     :has_slack_webhook_url,
     :last_changed_by,
     :defaults,
     :field_dependencies,
     :field_groups,
     :form_sections,
+    :signer_roles,
+    :signature_request_cc,
     :predefined_fields,
     :predefined_fields_sample_data,
     :html,
@@ -70,7 +74,8 @@ defmodule Docspring.Model.Template do
     :html_escape_data,
     :layout,
     :embed_edit_token,
-    :versions
+    :versions,
+    :override_account_expiry
   ]
 
   @type t :: %__MODULE__{
@@ -94,6 +99,7 @@ defmodule Docspring.Model.Template do
     :ai_field_naming_language => Docspring.Model.AiFieldNamingLanguage.t | nil,
     :allow_additional_properties => boolean(),
     :allow_skipping_optional_fields => boolean(),
+    :continue_before_optional_fields => boolean(),
     :default_form_mode => Docspring.Model.TemplateFormMode.t,
     :editable_submissions => boolean(),
     :embed_domains => [String.t],
@@ -120,12 +126,15 @@ defmodule Docspring.Model.Template do
     :success_title => String.t | nil,
     :success_message => String.t | nil,
     :show_fill_again_button => boolean(),
+    :form_sections_in_order => boolean(),
     :has_slack_webhook_url => boolean(),
     :last_changed_by => Docspring.Model.TemplateActor.t | nil,
     :defaults => Docspring.Model.TemplateDefaults.t,
     :field_dependencies => [Docspring.Model.TemplateFieldDependency.t],
     :field_groups => [Docspring.Model.FieldGroup.t],
     :form_sections => [Docspring.Model.TemplateFormSection.t],
+    :signer_roles => [Docspring.Model.TemplateSignerRole.t],
+    :signature_request_cc => [String.t],
     :predefined_fields => [Docspring.Model.PredefinedField.t],
     :predefined_fields_sample_data => %{optional(String.t) => any()} | nil,
     :html => String.t | nil,
@@ -136,7 +145,8 @@ defmodule Docspring.Model.Template do
     :html_escape_data => boolean() | nil,
     :layout => %{optional(String.t) => any()} | nil,
     :embed_edit_token => String.t | nil,
-    :versions => [Docspring.Model.TemplateVersion.t]
+    :versions => [Docspring.Model.TemplateVersion.t],
+    :override_account_expiry => boolean()
   }
 
   alias Docspring.Deserializer
@@ -155,6 +165,7 @@ defmodule Docspring.Model.Template do
      |> Deserializer.deserialize(:field_dependencies, :list, Docspring.Model.TemplateFieldDependency)
      |> Deserializer.deserialize(:field_groups, :list, Docspring.Model.FieldGroup)
      |> Deserializer.deserialize(:form_sections, :list, Docspring.Model.TemplateFormSection)
+     |> Deserializer.deserialize(:signer_roles, :list, Docspring.Model.TemplateSignerRole)
      |> Deserializer.deserialize(:predefined_fields, :list, Docspring.Model.PredefinedField)
      |> Deserializer.deserialize(:html_engine_options, :struct, Docspring.Model.HtmlEngineOptions)
      |> Deserializer.deserialize(:versions, :list, Docspring.Model.TemplateVersion)

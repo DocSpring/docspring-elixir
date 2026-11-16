@@ -14,6 +14,8 @@ defmodule Docspring.Model.FieldOverride do
     :title,
     :required,
     :option_list,
+    :option_labels,
+    :print_option_labels,
     :combined_field_names,
     :combined_field_type,
     :combined_field_separator,
@@ -23,6 +25,8 @@ defmodule Docspring.Model.FieldOverride do
     :signature_allow_draw,
     :signature_allow_type,
     :barcode_symbology,
+    :comb_fill_from_right,
+    :comb_pad_with_zeros,
     :hidden,
     :x,
     :y,
@@ -69,6 +73,7 @@ defmodule Docspring.Model.FieldOverride do
     :number_condition_range_exclusive_max,
     :invert_boolean_condition,
     :decimal_places,
+    :number_part,
     :image_scale_type,
     :image_gravity
   ]
@@ -80,6 +85,8 @@ defmodule Docspring.Model.FieldOverride do
     :title => String.t | nil,
     :required => boolean() | nil,
     :option_list => String.t | nil,
+    :option_labels => %{optional(String.t) => String.t} | nil,
+    :print_option_labels => boolean() | nil,
     :combined_field_names => String.t | nil,
     :combined_field_type => Docspring.Model.CombinedFieldType.t | nil,
     :combined_field_separator => String.t | nil,
@@ -89,6 +96,8 @@ defmodule Docspring.Model.FieldOverride do
     :signature_allow_draw => boolean() | nil,
     :signature_allow_type => boolean() | nil,
     :barcode_symbology => Docspring.Model.BarcodeSymbology.t | nil,
+    :comb_fill_from_right => boolean() | nil,
+    :comb_pad_with_zeros => boolean() | nil,
     :hidden => boolean() | nil,
     :x => number() | nil,
     :y => number() | nil,
@@ -135,6 +144,7 @@ defmodule Docspring.Model.FieldOverride do
     :number_condition_range_exclusive_max => boolean() | nil,
     :invert_boolean_condition => boolean() | nil,
     :decimal_places => integer() | nil,
+    :number_part => Docspring.Model.NumberPart.t | nil,
     :image_scale_type => Docspring.Model.ImageScaleType.t | nil,
     :image_gravity => Docspring.Model.ImageGravity.t | nil
   }
@@ -154,6 +164,7 @@ defmodule Docspring.Model.FieldOverride do
      |> Deserializer.deserialize(:check_character, :struct, Docspring.Model.CheckCharacter)
      |> Deserializer.deserialize(:string_condition_type, :struct, Docspring.Model.StringConditionType)
      |> Deserializer.deserialize(:number_condition_type, :struct, Docspring.Model.NumberConditionType)
+     |> Deserializer.deserialize(:number_part, :struct, Docspring.Model.NumberPart)
      |> Deserializer.deserialize(:image_scale_type, :struct, Docspring.Model.ImageScaleType)
      |> Deserializer.deserialize(:image_gravity, :struct, Docspring.Model.ImageGravity)
   end

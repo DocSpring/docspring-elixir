@@ -13,6 +13,7 @@ defmodule Docspring.Model.PredefinedField do
     :title,
     :type,
     :option_list,
+    :option_labels,
     :required_in_template,
     :field_required
   ]
@@ -23,6 +24,7 @@ defmodule Docspring.Model.PredefinedField do
     :title => String.t | nil,
     :type => Docspring.Model.FieldType.t,
     :option_list => String.t | nil,
+    :option_labels => %{optional(String.t) => String.t} | nil,
     :required_in_template => boolean() | nil,
     :field_required => boolean() | nil
   }
