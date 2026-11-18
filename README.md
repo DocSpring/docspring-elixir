@@ -13,7 +13,7 @@ pull requests are welcome.
 Outside Elixir code, the [DocSpring CLI](https://docspring.com/docs/cli/) calls the same API from a terminal or a
 shell script, and the [MCP server](https://docspring.com/docs/mcp/) connects AI assistants to your account.
 
-Version 4.6.0. Requires Elixir ~> 1.18.
+Version 4.7.0. Requires Elixir ~> 1.18.
 
 ## Install and configure
 
@@ -22,7 +22,7 @@ Add to your `mix.exs` dependencies:
 ```elixir
 def deps do
   [
-    {:docspring, "~> 4.6.0"}
+    {:docspring, "~> 4.7.0"}
   ]
 end
 ```
@@ -92,6 +92,7 @@ Elixir code for every method.
 | Method | Description |
 | ------ | ----------- |
 | [`add_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#add_template_fields/4) | Add fields to a template |
+| [`ask_support_help`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#ask_support_help/3) | Ask for help |
 | [`copy_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#copy_template/3) | Copy a template |
 | [`create_account_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_account_email_action/3) | Create an account email action |
 | [`create_combined_pdf`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#create_combined_pdf/3) | Combine PDFs |
@@ -128,6 +129,8 @@ Elixir code for every method.
 | [`get_signature_request`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_signature_request/3) | Get a signature request |
 | [`get_submission`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_submission/3) | Get a submission |
 | [`get_submission_batch`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_submission_batch/3) | Get a batch |
+| [`get_support_help`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_support_help/3) | Get a help request |
+| [`get_support_ticket`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_support_ticket/3) | Get a support ticket |
 | [`get_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template/3) | Get a template |
 | [`get_template_diff`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_diff/3) | Compare a version of a template with the one before it |
 | [`get_template_model_code`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#get_template_model_code/4) | Generate typed code for a template's submission data |
@@ -142,19 +145,23 @@ Elixir code for every method.
 | [`list_email_domains`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_email_domains/2) | List email domains |
 | [`list_folders`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_folders/2) | List folders |
 | [`list_submissions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_submissions/2) | List submissions |
+| [`list_support_tickets`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_support_tickets/2) | List support tickets |
 | [`list_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_template_fields/3) | List a template's fields |
 | [`list_template_submissions`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_template_submissions/3) | List a template's submissions |
 | [`list_templates`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_templates/2) | List templates |
 | [`list_webhooks`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#list_webhooks/2) | List webhooks |
 | [`move_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#move_folder/4) | Move a folder |
 | [`move_template`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#move_template/4) | Move a template to a folder |
+| [`open_support_ticket`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#open_support_ticket/3) | Open a support ticket |
 | [`publish_template_version`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#publish_template_version/4) | Publish a template version |
 | [`remove_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#remove_template_fields/4) | Remove fields from a template |
 | [`rename_folder`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#rename_folder/4) | Rename a folder |
 | [`reorder_template_fields`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#reorder_template_fields/4) | Reorder a template's fields |
+| [`reply_to_support_ticket`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#reply_to_support_ticket/4) | Reply to a support ticket |
 | [`restore_template_version`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#restore_template_version/4) | Restore a template version |
 | [`send_account_email_action_test_email`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#send_account_email_action_test_email/3) | Send a test email for an account email action |
 | [`send_email_action_test_email`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#send_email_action_test_email/4) | Send a test email |
+| [`send_support_feedback`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#send_support_feedback/3) | Send feedback |
 | [`test_authentication`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#test_authentication/2) | Test authentication |
 | [`update_account_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_account_email_action/4) | Update an account email action |
 | [`update_email_action`](https://hexdocs.pm/docspring/Docspring.Api.Client.html#update_email_action/5) | Update an email action |

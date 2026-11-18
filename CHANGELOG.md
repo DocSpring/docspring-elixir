@@ -1,3 +1,12 @@
+### 4.7.0 [November 18, 2026]
+
+- New: support for AI agents that use DocSpring. `ask_support_help` puts a question to DocSpring's AI help, which
+  answers from the documentation (`get_support_help` gets the answer again). `send_support_feedback` tells us what got
+  in the way, and nobody replies to it. `open_support_ticket` opens a ticket that a person on our team answers, with
+  `list_support_tickets`, `get_support_ticket` and `reply_to_support_ticket` to follow it, and each ticket's
+  `watch_url` says when it changes. Every API token can call them, whatever its scopes. See
+  [Support for AI agents](https://docspring.com/docs/api-guide/support-for-ai-agents/).
+
 ### 4.6.0 [November 17, 2026]
 
 - New: `Field` has `comb_fill_from_right`, `comb_pad_with_zeros` and `print_digits_only`, which set how a comb
